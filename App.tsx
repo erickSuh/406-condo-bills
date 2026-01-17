@@ -10,13 +10,14 @@ import { AlertProvider, useAlert } from './app/shared/context/AlertContext';
 import { ErrorBoundary } from './app/shared/context/ErrorBoundary';
 import { registerAlertCallback } from './app/infrastructure/api/api-interceptor';
 import { initializeDatabase } from './app/infrastructure/database';
+import { DatabaseProvider } from '@/shared/context/DatabaseContext';
 
 function AppContent() {
-  // const { showAlert } = useAlert();
+  const { showAlert } = useAlert();
 
-  // useEffect(() => {
-  //   registerAlertCallback(showAlert);
-  // }, [showAlert]);
+  useEffect(() => {
+    registerAlertCallback(showAlert);
+  }, [showAlert]);
 
   useEffect(() => {
     initializeDatabase();
@@ -37,12 +38,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <>
-      {/* <AlertProvider> */}
+    <DatabaseProvider>
       <ErrorBoundary>
-        <AppContent />
+        <AlertProvider>
+          <AppContent />
+        </AlertProvider>
       </ErrorBoundary>
-      {/* </AlertProvider> */}
-    </>
+    </DatabaseProvider>
   );
 }

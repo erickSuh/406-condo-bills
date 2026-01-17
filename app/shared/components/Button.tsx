@@ -4,54 +4,56 @@ import {
   TouchableOpacityProps,
   Text,
   StyleSheet,
-  StyleSheetProperties,
 } from 'react-native';
 import colors from '../../styles/colors';
 import fonts from '../../styles/fonts';
 
-type ButtonType = 'button' | 'pill';
+type ButtonVariant = 'primary' | 'secondary';
+
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
   color?: string;
-  type?: ButtonType;
-  textStyle?: StyleSheetProperties;
+  variant?: ButtonVariant;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   title,
-  type = 'button',
+  variant = 'primary',
   color,
   style,
   ...rest
 }) => {
+  const buttonColor =
+    color || (variant === 'primary' ? colors.red : colors.red);
+  const dynamicStyle = styles(variant, buttonColor);
+
   return (
     <TouchableOpacity
-      style={[styles(type, color ? color : colors.blue).container, style]}
+      style={[dynamicStyle.container, style]}
       activeOpacity={0.7}
       {...rest}
     >
-      <Text style={styles(type, color ? color : colors.blue).text}>
-        {title}
-      </Text>
+      <Text style={dynamicStyle.text}>{title}</Text>
     </TouchableOpacity>
   );
 };
 
-const styles = (type: ButtonType, color: string) =>
+const styles = (variant: ButtonVariant, color: string) =>
   StyleSheet.create({
     container: {
-      backgroundColor: type === 'button' ? color : colors.font_inverse,
+      backgroundColor: variant === 'primary' ? color : colors.font_inverse,
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: 16,
-      height: type === 'button' ? 56 : 30,
-      paddingHorizontal: type === 'button' ? 20 : 10,
-      ...(type !== 'button' && { borderColor: color }),
-      borderWidth: type === 'button' ? 0 : 2,
+      borderRadius: 12,
+      height: 48,
+      paddingHorizontal: 24,
+      borderWidth: variant === 'secondary' ? 2 : 0,
+      borderColor: variant === 'secondary' ? colors.font_label : 'transparent',
     },
     text: {
       fontSize: 16,
-      color: type === 'button' ? colors.font_inverse : color,
+      fontWeight: '600',
+      color: variant === 'primary' ? colors.font_inverse : colors.font_label,
       fontFamily: fonts.heading,
     },
   });

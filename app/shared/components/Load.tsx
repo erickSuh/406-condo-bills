@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import LottieView from 'lottie-react-native';
+// import LottieView from 'lottie-react-native';
 
 // import loadAnimation from '../../../assets/animations/load.json';
 
 export const Load: React.FC = () => {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="load-container">
       {/* <LottieView
         source={loadAnimation}
         autoPlay={true}
