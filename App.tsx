@@ -11,6 +11,7 @@ import { ErrorBoundary } from './app/shared/context/ErrorBoundary';
 import { registerAlertCallback } from './app/infrastructure/api/api-interceptor';
 import { initializeDatabase } from './app/infrastructure/database';
 import { DatabaseProvider } from '@/shared/context/DatabaseContext';
+import './app/infrastructure/i18n';
 
 function AppContent() {
   const { showAlert } = useAlert();
