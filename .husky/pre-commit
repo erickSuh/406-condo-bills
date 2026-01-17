@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+echo "🔍 Running linter..."
+yarn lint
+
+echo "✅ Linting passed"
+
+echo "🧪 Running tests with coverage..."
+yarn test:coverage
+
+echo "✅ All validations passed"
