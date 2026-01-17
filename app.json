@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "newArchEnabled": true,
+    "name": "406-condo-bills",
+    "slug": "406-condo-bills",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "condobills",
+    "splash": {
+      "image": "./assets/shopping-basket.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F0EDF5"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eks.shoppinglist"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/shopping-basket.png",
+        "backgroundColor": "#F0EDF5"
+      },
+      "package": "com.eks.shoppinglist"
+    },
+    "web": {
+      "bundles": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true,
+          "useSQLCipher": true,
+          "android": {
+            "enableFTS": false,
+            "useSQLCipher": false
+          },
+          "ios": {
+            "customBuildFlags": [
+              "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
+            ]
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c1d80069-5562-48db-a125-09f80706d554"
+      }
+    }
+  }
+}

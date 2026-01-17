@@ -1,0 +1,11 @@
+/**
+ * Arquivo de índice para re-exportar componentes compartilhados
+ * Facilita imports em toda aplicação
+ */
+
+// Componentes comuns que devem estar em src/shared/components
+// Exemplo: Button, Input, Load, etc.
+
+export { Button } from './Button';
+export { Input } from './Input';
+export { Load } from './Load';
