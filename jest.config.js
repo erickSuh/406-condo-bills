@@ -26,4 +26,12 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(expo|expo-font|expo-splash-screen|expo-sqlite|@expo|@react-native|react-native|react-native-screens|react-native-safe-area-context|@react-navigation)/)',
   ],
+  coverageThreshold: {
+    global: {
+      branches: 15,
+      functions: 7,
+      lines: 8,
+      statements: 9,
+    },
+  },
 };
