@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../styles/colors';
 import fonts from '../../styles/fonts';
+import { minActions } from '@/styles/sizes';
 
 interface HeaderProps {
   title: string;
@@ -20,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
       <Text style={styles.title}>{title}</Text>
       {callToAction && (
         <TouchableOpacity style={styles.button} onPress={callToAction}>
-          <Ionicons name={icon as any} size={28} color={colors.font_inverse} />
+          <Ionicons name={icon as any} size={22} color={colors.font_inverse} />
         </TouchableOpacity>
       )}
     </View>
@@ -33,17 +34,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+    minHeight: minActions.action.minHeight,
+    minWidth: minActions.action.minWidth,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: fonts.sizes.header,
     color: colors.font_inverse,
     fontFamily: fonts.heading,
+    lineHeight: fonts.lineHeights.header,
+    textAlignVertical: 'bottom',
   },
   button: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 21,
+    height: 42,
     justifyContent: 'center',
     alignItems: 'center',
   },

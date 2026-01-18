@@ -1,10 +1,16 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import ptBR from './locales/pt-br.json';
+import common from './locales/pt-br/common.json';
+import errors from './locales/pt-br/errors.json';
+import messages from './locales/pt-br/messages.json';
+import cashFlowListScreen from './locales/pt-br/cashFlowListScreen.json';
 
 const resources = {
   'pt-BR': {
-    translation: ptBR,
+    common,
+    errors,
+    messages,
+    cashFlowListScreen,
   },
 };
 
@@ -12,6 +18,8 @@ i18next.use(initReactI18next).init({
   resources,
   lng: 'pt-BR',
   fallbackLng: 'pt-BR',
+  ns: 'common',
+  defaultNS: 'common',
   interpolation: {
     escapeValue: false,
   },

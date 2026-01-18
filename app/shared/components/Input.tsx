@@ -17,7 +17,7 @@ export const Input = ({
   const [focused, setFocused] = useState(false);
 
   return (
-    <View style={[styles.container, focused && styles.containerFocused]}>
+    <View style={[styles.container, focused && styles.containerFocused, style]}>
       {!focused && icon && (
         <Ionicons
           name={icon as any}
@@ -27,7 +27,7 @@ export const Input = ({
         />
       )}
       <TextInput
-        style={[styles.input, style]}
+        style={[styles.input]}
         onChange={onChange}
         ref={ref}
         onFocus={e => {
@@ -58,9 +58,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.icon_light_gray,
-    minHeight: 24,
   },
   containerFocused: {
     borderColor: colors.blue,

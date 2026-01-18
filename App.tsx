@@ -1,11 +1,17 @@
 import React, { Suspense, useEffect } from 'react';
 import Routes from './app/routes';
 import {
-  useFonts,
+  useFonts as useRobotoFonts,
   Roboto_400Regular,
   Roboto_500Medium,
   Roboto_700Bold,
 } from '@expo-google-fonts/roboto';
+import {
+  useFonts as useRubikFonts,
+  Rubik_400Regular,
+  Rubik_500Medium,
+  Rubik_700Bold,
+} from '@expo-google-fonts/rubik';
 import { AlertProvider } from './app/shared/context/AlertContext';
 import { ErrorBoundary } from './app/shared/context/ErrorBoundary';
 import { initializeDatabase } from './app/infrastructure/database';
@@ -17,13 +23,19 @@ function AppContent() {
     initializeDatabase();
   }, []);
 
-  const [fontsLoaded] = useFonts({
+  const [robotoFontsLoaded] = useRobotoFonts({
     Roboto_400Regular,
     Roboto_500Medium,
     Roboto_700Bold,
   });
 
-  if (!fontsLoaded) {
+  const [rubikFontsLoaded] = useRubikFonts({
+    Rubik_400Regular,
+    Rubik_500Medium,
+    Rubik_700Bold,
+  });
+
+  if (!robotoFontsLoaded || !rubikFontsLoaded) {
     return <></>;
   }
 

@@ -9,8 +9,13 @@ import { CashFlowItem } from '../types';
 import spaces from '@/styles/spaces';
 
 export const CashFlowListScreen: React.FC = () => {
-  const { filteredItems, searchQuery, setSearchQuery, handleDelete } =
-    useCashFlowList();
+  const {
+    filteredItems,
+    searchQuery,
+    setSearchQuery,
+    handleDelete,
+    tCashFlowListScreen,
+  } = useCashFlowList();
 
   const getCodeColor = (code: number): string => {
     return code === 0 ? colors.green : colors.red;
@@ -29,24 +34,30 @@ export const CashFlowListScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Header
-          title="Plano de Contas"
+          title={tCashFlowListScreen('title')}
           icon="add"
           callToAction={() => console.log('Add account')}
         />
 
         <Input
-          placeholder="Pesquisar conta"
+          placeholder={tCashFlowListScreen('searchInputPlaceholder')}
           value={searchQuery}
           onChangeText={setSearchQuery}
           icon={'search'}
+          maxLength={120}
+          style={styles.headerInput}
         />
       </View>
 
       <View style={styles.content}>
         <View style={styles.listHeader}>
-          <Text style={styles.listHeaderTitle}>Listagem</Text>
+          <Text style={styles.listHeaderTitle}>
+            {tCashFlowListScreen('listHeader')}
+          </Text>
           <Text style={styles.listHeaderCount}>
-            {filteredItems.length} registros
+            {tCashFlowListScreen('listHeaderRegistryCount', {
+              count: filteredItems.length,
+            })}
           </Text>
         </View>
 
@@ -57,7 +68,9 @@ export const CashFlowListScreen: React.FC = () => {
           scrollEnabled={true}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Nenhuma conta encontrada</Text>
+              <Text style={styles.emptyText}>
+                {tCashFlowListScreen('emptyListMessage')}
+              </Text>
             </View>
           }
         />
@@ -75,6 +88,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
+  headerInput: {
+    borderRadius: 100,
+    height: 56,
+    marginBottom: 20,
+    marginTop: 12,
+    paddingHorizontal: 20,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 20,
@@ -87,18 +107,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spaces.base,
+    marginBottom: spaces.large,
   },
   listHeaderTitle: {
-    fontSize: spaces.large,
-    fontWeight: '600',
-    color: colors.font_label,
+    fontSize: 20,
+    color: colors.font_header,
     fontFamily: fonts.heading,
   },
   listHeaderCount: {
-    fontSize: fonts.sizes.small,
+    fontSize: fonts.sizes.base,
     color: colors.font_caption,
-    fontFamily: fonts.primary,
+    fontFamily: fonts.listItemCount,
   },
   emptyContainer: {
     justifyContent: 'center',
