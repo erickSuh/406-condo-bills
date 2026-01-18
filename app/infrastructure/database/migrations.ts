@@ -12,17 +12,6 @@ export const migration_001_create_tables: Migration = {
   name: 'create_tables',
   up: async (db: SQLite.SQLiteDatabase) => {
     await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS cash_flow (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        code TEXT NOT NULL,
-        title TEXT NOT NULL,
-        deleted INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS flow_types (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         label TEXT NOT NULL,
@@ -35,6 +24,19 @@ export const migration_001_create_tables: Migration = {
       INSERT INTO flow_types (label) VALUES
       ('Income'),
       ('Expense');
+    `);
+
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS cash_flow (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL,
+        title TEXT NOT NULL,
+        type INTEGER NOT NULL DEFAULT 0,
+        deleted INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(type) REFERENCES flow_types(id)
+      );
     `);
   },
   down: async (db: SQLite.SQLiteDatabase) => {
