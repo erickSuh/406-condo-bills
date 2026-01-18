@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useAlert } from './AlertContext';
 
@@ -31,7 +31,10 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (__DEV__) {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.error('ErrorBoundary caught:', error, errorInfo);
+    } else if (typeof __DEV__ === 'undefined') {
+      // Fallback for testing/other environments
       console.error('ErrorBoundary caught:', error, errorInfo);
     }
   }
@@ -62,7 +65,7 @@ interface ErrorFallbackProps {
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, onReset }) => {
   const { showAlert } = useAlert();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       showAlert({
         title: 'Application Error',

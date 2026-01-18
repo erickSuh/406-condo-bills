@@ -7,6 +7,7 @@ export default {
   font_caption: '#A0A0B2',
   font_label: '#6A6A6A',
   font_inverse: '#FFFFFF',
+  font_header: '#3D3D4C',
 
   icon_light_gray: '#C4C4D1',
 

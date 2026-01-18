@@ -1,0 +1,7 @@
+{
+  "title": "Plano de Contas",
+  "searchInputPlaceholder": "Pesquisar contas",
+  "listHeader": "Listagem",
+  "listHeaderRegistryCount": "{{count}} registros",
+  "emptyListMessage": "Nenhuma conta encontrada"
+}

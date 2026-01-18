@@ -1,0 +1,15 @@
+{
+  "title": "Inserir Conta",
+  "parentAccount": "Conta pai",
+  "selectParentAccount": "Selecione a conta pai",
+  "code": "Código",
+  "codePlaceholder": "Ex: 1.1",
+  "name": "Nome",
+  "namePlaceholder": "Nome da conta",
+  "type": "Tipo",
+  "selectType": "Selecione o tipo",
+  "acceptsEntries": "Aceita lançamentos",
+  "selectAcceptsEntries": "Selecione",
+  "cancel": "Cancelar",
+  "save": "Salvar"
+}
