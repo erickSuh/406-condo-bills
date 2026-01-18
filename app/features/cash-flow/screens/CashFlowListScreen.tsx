@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '@/styles/colors';
@@ -7,19 +7,23 @@ import { Input, FixedDialogCard, Header } from '@/shared/components';
 import { useCashFlowList } from '../hooks/useCashFlowList';
 import { CashFlowItem } from '../types';
 import spaces from '@/styles/spaces';
+import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackNavigationProp } from '@/routes/types';
 
 export const CashFlowListScreen: React.FC = () => {
-  const {
-    filteredItems,
-    searchQuery,
-    setSearchQuery,
-    handleDelete,
-    tCashFlowListScreen,
-  } = useCashFlowList();
+  const { t } = useTranslation('cashFlowListScreen');
+  const { navigate } = useNavigation<RootStackNavigationProp>();
+  const { filteredItems, searchQuery, setSearchQuery, handleDelete } =
+    useCashFlowList();
 
   const getCodeColor = (code: number): string => {
     return code === 0 ? colors.green : colors.red;
   };
+
+  const handleNavigateToForm = useCallback(() => {
+    navigate('CashFlowFormScreen');
+  }, [navigate]);
 
   const renderItem = ({ item }: { item: CashFlowItem }) => (
     <FixedDialogCard
@@ -34,13 +38,13 @@ export const CashFlowListScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Header
-          title={tCashFlowListScreen('title')}
+          title={t('title')}
           icon="add"
-          callToAction={() => console.log('Add account')}
+          callToAction={handleNavigateToForm}
         />
 
         <Input
-          placeholder={tCashFlowListScreen('searchInputPlaceholder')}
+          placeholder={t('searchInputPlaceholder')}
           value={searchQuery}
           onChangeText={setSearchQuery}
           icon={'search'}
@@ -51,11 +55,9 @@ export const CashFlowListScreen: React.FC = () => {
 
       <View style={styles.content}>
         <View style={styles.listHeader}>
-          <Text style={styles.listHeaderTitle}>
-            {tCashFlowListScreen('listHeader')}
-          </Text>
+          <Text style={styles.listHeaderTitle}>{t('listHeader')}</Text>
           <Text style={styles.listHeaderCount}>
-            {tCashFlowListScreen('listHeaderRegistryCount', {
+            {t('listHeaderRegistryCount', {
               count: filteredItems.length,
             })}
           </Text>
@@ -68,9 +70,7 @@ export const CashFlowListScreen: React.FC = () => {
           scrollEnabled={true}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>
-                {tCashFlowListScreen('emptyListMessage')}
-              </Text>
+              <Text style={styles.emptyText}>{t('emptyListMessage')}</Text>
             </View>
           }
         />

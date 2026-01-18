@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useDatabase } from '@/shared/context/DatabaseContext';
 import { CashFlowRepository } from '../api';
 import { CashFlowItem } from '../types';
-import { useTranslation } from 'react-i18next';
 
 export const useCashFlowList = () => {
   const { db, isReady } = useDatabase();
@@ -11,7 +10,6 @@ export const useCashFlowList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const { t: tCashFlowListScreen } = useTranslation('cashFlowListScreen');
 
   useEffect(() => {
     if (isReady && db) {
@@ -72,6 +70,5 @@ export const useCashFlowList = () => {
     isLoading,
     error,
     handleDelete,
-    tCashFlowListScreen,
   };
 };
