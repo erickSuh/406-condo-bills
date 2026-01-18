@@ -7,12 +7,7 @@ import React, {
 } from 'react';
 import { initializeDatabase } from '../../infrastructure/database';
 import type * as SQLite from 'expo-sqlite';
-
-interface DatabaseContextType {
-  db: SQLite.SQLiteDatabase | null;
-  isReady: boolean;
-  error: Error | null;
-}
+import { DatabaseContextType } from '../types/DatabaseContext';
 
 const DatabaseContext = createContext<DatabaseContextType | undefined>(
   undefined,

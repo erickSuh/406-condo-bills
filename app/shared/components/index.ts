@@ -7,5 +7,7 @@
 // Exemplo: Button, Input, Load, etc.
 
 export { Button } from './Button';
+export { FixedDialogCard } from './FixedDialogCard';
+export { Header } from './Header';
 export { Input } from './Input';
 export { Load } from './Load';

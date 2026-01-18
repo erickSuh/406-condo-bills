@@ -45,4 +45,18 @@ export const migration_001_create_tables: Migration = {
   },
 };
 
-export const migrations: Migration[] = [migration_001_create_tables];
+export const migration_002_create_tables: Migration = {
+  version: 2,
+  name: 'add_test_data',
+  up: async (db: SQLite.SQLiteDatabase) => {
+    await db.execAsync(`
+      INSERT INTO cash_flow (code, title, type) VALUES
+      ('1', 'Title teste', 0);
+    `);
+  },
+};
+
+export const migrations: Migration[] = [
+  migration_001_create_tables,
+  migration_002_create_tables,
+];

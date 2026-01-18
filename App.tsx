@@ -6,20 +6,13 @@ import {
   Roboto_500Medium,
   Roboto_700Bold,
 } from '@expo-google-fonts/roboto';
-import { AlertProvider, useAlert } from './app/shared/context/AlertContext';
+import { AlertProvider } from './app/shared/context/AlertContext';
 import { ErrorBoundary } from './app/shared/context/ErrorBoundary';
-import { registerAlertCallback } from './app/infrastructure/api/api-interceptor';
 import { initializeDatabase } from './app/infrastructure/database';
 import { DatabaseProvider } from '@/shared/context/DatabaseContext';
 import './app/infrastructure/i18n';
 
 function AppContent() {
-  const { showAlert } = useAlert();
-
-  useEffect(() => {
-    registerAlertCallback(showAlert);
-  }, [showAlert]);
-
   useEffect(() => {
     initializeDatabase();
   }, []);
@@ -39,12 +32,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <DatabaseProvider>
-      <ErrorBoundary>
-        <AlertProvider>
+    <AlertProvider>
+      <DatabaseProvider>
+        <ErrorBoundary>
           <AppContent />
-        </AlertProvider>
-      </ErrorBoundary>
-    </DatabaseProvider>
+        </ErrorBoundary>
+      </DatabaseProvider>
+    </AlertProvider>
   );
 }

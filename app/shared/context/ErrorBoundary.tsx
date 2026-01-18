@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useAlert } from './AlertContext';
 
@@ -62,7 +62,7 @@ interface ErrorFallbackProps {
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, onReset }) => {
   const { showAlert } = useAlert();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       showAlert({
         title: 'Application Error',
