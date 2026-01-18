@@ -31,7 +31,10 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (__DEV__) {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.error('ErrorBoundary caught:', error, errorInfo);
+    } else if (typeof __DEV__ === 'undefined') {
+      // Fallback for testing/other environments
       console.error('ErrorBoundary caught:', error, errorInfo);
     }
   }
