@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Routes from './app/routes';
 import {
   useFonts as useRobotoFonts,
@@ -20,7 +20,9 @@ import './app/infrastructure/i18n';
 
 function AppContent() {
   useEffect(() => {
-    initializeDatabase();
+    initializeDatabase().catch(error =>
+      console.error('Failed to initialize database:', error),
+    );
   }, []);
 
   const [robotoFontsLoaded] = useRobotoFonts({

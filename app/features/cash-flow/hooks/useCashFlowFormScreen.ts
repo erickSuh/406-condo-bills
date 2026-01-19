@@ -66,7 +66,6 @@ export const useCashFlowFormScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [parentItems, setParentItems] = useState<CashFlowItem[]>([]);
   const [flowTypes, setFlowTypes] = useState<FlowType[]>([]);
-  const [suggestedCode, setSuggestedCode] = useState<string>('');
   const { t } = useTranslation([CASH_FLOW_FORM_NAMESPACE, 'common']);
   const { goBack } = useNavigation();
 
@@ -88,7 +87,6 @@ export const useCashFlowFormScreen = () => {
   });
 
   const parentAccountIdValue = watch('parentAccountId');
-  const typeValue = watch('type');
 
   const refetchItems = useCallback(async () => {
     if (!db) return;
@@ -117,7 +115,6 @@ export const useCashFlowFormScreen = () => {
 
   useEffect(() => {
     if (!db || !parentAccountIdValue) {
-      setSuggestedCode('');
       return;
     }
 
@@ -136,7 +133,6 @@ export const useCashFlowFormScreen = () => {
           .map(item => item.code);
 
         const suggested = suggestNextCode(parentItem.code, childrenCodes);
-        setSuggestedCode(suggested || '');
 
         if (suggested) {
           setValue('code', suggested);

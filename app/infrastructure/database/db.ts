@@ -3,15 +3,29 @@ import { runMigrations } from './migrationManager';
 
 const dbName = 'condo_bills.db';
 let db: SQLite.SQLiteDatabase | null = null;
+let initPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export const initDatabase = async () => {
   if (db) return db;
 
-  db = await SQLite.openDatabaseAsync(dbName);
+  if (initPromise) return initPromise;
 
-  await runMigrations(db);
+  initPromise = (async () => {
+    try {
+      console.log('execute database initDatabase');
+      db = await SQLite.openDatabaseAsync(dbName);
 
-  return db;
+      await runMigrations(db);
+
+      return db;
+    } catch (error) {
+      db = null;
+      initPromise = null;
+      throw error;
+    }
+  })();
+
+  return initPromise;
 };
 
 export const getDatabase = async () => {

@@ -17,6 +17,7 @@ import { CashFlowItem } from '../types';
 import spaces from '@/styles/spaces';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackNavigationProp } from '@/routes/types';
+import { borderRadius } from '@/styles/borderRadius';
 
 export const CashFlowListScreen: React.FC = () => {
   const { navigate } = useNavigation<RootStackNavigationProp>();
@@ -137,7 +138,7 @@ export const CashFlowListScreen: React.FC = () => {
                 })}
                 variant="tertiary"
                 color={colors.red}
-                style={styles.cancelButton}
+                style={styles.deleteButton}
                 onPress={cancelDelete}
               />
               <Button
@@ -147,7 +148,7 @@ export const CashFlowListScreen: React.FC = () => {
                 })}
                 variant="primary"
                 color={colors.red}
-                style={styles.confirmButton}
+                style={styles.deleteButton}
                 onPress={confirmDelete}
               />
             </View>
@@ -168,19 +169,19 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   headerInput: {
-    borderRadius: 100,
+    borderRadius: borderRadius.full,
     height: 56,
-    marginBottom: 20,
-    marginTop: 12,
-    paddingHorizontal: 20,
+    marginBottom: spaces.large,
+    marginTop: spaces.base,
+    paddingHorizontal: spaces.large,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: spaces.large,
+    paddingTop: spaces.base,
     backgroundColor: colors.background_secondary,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: borderRadius.medium,
+    borderTopRightRadius: borderRadius.medium,
   },
   listHeader: {
     flexDirection: 'row',
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: spaces.large,
   },
   emptyText: {
     fontSize: fonts.sizes.base,
@@ -216,20 +217,20 @@ const styles = StyleSheet.create({
   },
   deleteModalContainer: {
     backgroundColor: colors.font_inverse,
-    borderRadius: 16,
-    paddingHorizontal: 24,
+    borderRadius: borderRadius.small,
+    paddingHorizontal: spaces.large,
     paddingVertical: 32,
     alignItems: 'center',
     width: '85%',
   },
   deleteIconContainer: {
-    marginBottom: 16,
+    marginBottom: spaces.base,
   },
   deleteModalTitle: {
     fontSize: 18,
     fontFamily: fonts.heading,
     color: colors.font_primary,
-    marginBottom: 24,
+    marginBottom: spaces.large,
     textAlign: 'center',
   },
   deleteModalButtons: {
@@ -237,11 +238,8 @@ const styles = StyleSheet.create({
     gap: spaces.base,
     width: '100%',
   },
-  cancelButton: {
+  deleteButton: {
     flex: 1,
-  },
-  confirmButton: {
-    flex: 1,
-    borderRadius: 24,
+    borderRadius: borderRadius.medium,
   },
 });

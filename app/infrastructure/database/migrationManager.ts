@@ -15,23 +15,41 @@ export const runMigrations = async (db: SQLite.SQLiteDatabase) => {
       'SELECT version FROM schema_migrations ORDER BY version',
     );
 
-    const appliedVersions = appliedMigrations.map(m => m.version);
+    const appliedVersions = new Set(appliedMigrations.map(m => m.version));
+    console.log('Applied migrations:', Array.from(appliedVersions));
 
     for (const migration of migrations) {
-      if (!appliedVersions.includes(migration.version)) {
+      if (appliedVersions.has(migration.version)) {
         console.log(
-          `Running migration ${migration.version}: ${migration.name}`,
+          `⏭️  Migration ${migration.version} already applied, skipping`,
         );
-
-        await migration.up(db);
-
-        await db.runAsync(
-          'INSERT OR IGNORE INTO schema_migrations (version, name) VALUES (?, ?)',
-          [migration.version, migration.name],
-        );
-
-        console.log(`✅ Migration ${migration.version} completed`);
+        continue;
       }
+
+      const existingMigration = await db.getFirstAsync<{ version: number }>(
+        'SELECT version FROM schema_migrations WHERE version = ?',
+        [migration.version],
+      );
+
+      if (existingMigration) {
+        console.log(
+          `⏭️  Migration ${migration.version} already in database, skipping`,
+        );
+        appliedVersions.add(migration.version);
+        continue;
+      }
+
+      console.log(`Running migration ${migration.version}: ${migration.name}`);
+
+      await migration.up(db);
+
+      await db.runAsync(
+        'INSERT INTO schema_migrations (version, name) VALUES (?, ?)',
+        [migration.version, migration.name],
+      );
+
+      console.log(`✅ Migration ${migration.version} completed`);
+      appliedVersions.add(migration.version);
     }
 
     console.log('✅ All migrations completed successfully');
