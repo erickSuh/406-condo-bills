@@ -2,6 +2,13 @@ import { CashFlowRepository } from '../api';
 
 jest.mock('../api');
 
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: (callback: any) => {
+    // Mock implementation - just call the callback immediately
+    callback();
+  },
+}));
+
 describe('CashFlow Logic Tests', () => {
   const mockCashFlows = [
     {

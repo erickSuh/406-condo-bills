@@ -1,7 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import {
   migration_001_create_tables,
-  migration_002_create_tables,
   migrations,
   Migration,
 } from '../migrations';
@@ -55,7 +54,7 @@ describe('Database Migrations', () => {
         await migration_001_create_tables.up(mockDb);
 
         expect(mockDb.execAsync).toHaveBeenCalledWith(
-          expect.stringContaining('INSERT INTO flow_types (label) VALUES'),
+          expect.stringContaining('INSERT OR IGNORE INTO flow_types'),
         );
       });
 
@@ -63,7 +62,8 @@ describe('Database Migrations', () => {
         await migration_001_create_tables.up(mockDb);
 
         const insertCall = mockDb.execAsync.mock.calls.find(
-          call => call[0] && call[0].includes('INSERT INTO flow_types'),
+          call =>
+            call[0] && call[0].includes('INSERT OR IGNORE INTO flow_types'),
         );
 
         expect(insertCall).toBeDefined();
@@ -163,73 +163,17 @@ describe('Database Migrations', () => {
     });
   });
 
-  describe('Migration 002 - Add Test Data', () => {
-    it('should define migration with correct version and name', () => {
-      expect(migration_002_create_tables.version).toBe(2);
-      expect(migration_002_create_tables.name).toBe('add_test_data');
-    });
-
-    it('should have up method', () => {
-      expect(migration_002_create_tables.up).toBeDefined();
-    });
-
-    it('should not have down method', () => {
-      expect(migration_002_create_tables.down).toBeUndefined();
-    });
-
-    describe('Up Migration', () => {
-      it('should insert test data into cash_flow', async () => {
-        await migration_002_create_tables.up(mockDb);
-
-        expect(mockDb.execAsync).toHaveBeenCalledWith(
-          expect.stringContaining('INSERT INTO cash_flow'),
-        );
-      });
-
-      it('should insert with code 1', async () => {
-        await migration_002_create_tables.up(mockDb);
-
-        const insertCall = mockDb.execAsync.mock.calls.find(
-          call => call[0] && call[0].includes('INSERT INTO cash_flow'),
-        );
-
-        expect(insertCall?.[0]).toContain("'1'");
-      });
-
-      it('should insert with title', async () => {
-        await migration_002_create_tables.up(mockDb);
-
-        const insertCall = mockDb.execAsync.mock.calls.find(
-          call => call[0] && call[0].includes('INSERT INTO cash_flow'),
-        );
-
-        expect(insertCall?.[0]).toContain("'Title teste'");
-      });
-
-      it('should insert with type 0 (Income)', async () => {
-        await migration_002_create_tables.up(mockDb);
-
-        const insertCall = mockDb.execAsync.mock.calls.find(
-          call => call[0] && call[0].includes('INSERT INTO cash_flow'),
-        );
-
-        expect(insertCall?.[0]).toContain('0');
-      });
-    });
-  });
-
   describe('Migrations Array', () => {
     it('should export migrations array', () => {
       expect(Array.isArray(migrations)).toBe(true);
     });
 
-    it('should contain both migrations', () => {
-      expect(migrations).toHaveLength(2);
+    it('should contain migration', () => {
+      expect(migrations.length).toBeGreaterThan(0);
     });
 
-    it('should have migrations in order', () => {
+    it('should have first migration as version 1', () => {
       expect(migrations[0].version).toBe(1);
-      expect(migrations[1].version).toBe(2);
     });
 
     it('should have unique versions', () => {
@@ -272,19 +216,25 @@ describe('Database Migrations', () => {
   });
 
   describe('Data Integrity', () => {
-    it('should maintain table structure across migrations', async () => {
-      // First migration creates tables
+    it('should create tables with correct structure', async () => {
       await migration_001_create_tables.up(mockDb);
-      const firstCallCount = mockDb.execAsync.mock.calls.length;
 
-      // Reset mocks
-      jest.clearAllMocks();
+      expect(mockDb.execAsync).toHaveBeenCalledWith(
+        expect.stringContaining('CREATE TABLE IF NOT EXISTS flow_types'),
+      );
+      expect(mockDb.execAsync).toHaveBeenCalledWith(
+        expect.stringContaining('CREATE TABLE IF NOT EXISTS cash_flow'),
+      );
+    });
 
-      // Second migration adds data
-      await migration_002_create_tables.up(mockDb);
+    it('should use INSERT OR IGNORE for idempotent migrations', async () => {
+      await migration_001_create_tables.up(mockDb);
 
-      // Should only have one exec call for insert
-      expect(mockDb.execAsync).toHaveBeenCalled();
+      const insertCalls = mockDb.execAsync.mock.calls.filter(call =>
+        call[0]?.includes('INSERT OR IGNORE'),
+      );
+
+      expect(insertCalls.length).toBeGreaterThan(0);
     });
   });
 });

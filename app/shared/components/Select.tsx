@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import colors from '@/styles/colors';
 import fonts from '@/styles/fonts';
-
-const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
-};
-
+import spaces from '@/styles/spaces';
 export interface SelectOption {
   label: string;
   value: string | number;
@@ -42,7 +35,7 @@ export const Select: React.FC<SelectProps> = ({
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity
-        onPress={() => editable && setIsOpen(!isOpen)}
+        onPress={() => editable && setIsOpen(true)}
         disabled={!editable}
         style={[
           styles.selectButton,
@@ -56,57 +49,62 @@ export const Select: React.FC<SelectProps> = ({
           {displayText}
         </Text>
         <Ionicons
-          name={isOpen ? 'chevron-up' : 'chevron-down'}
+          name="caret-down-outline"
           size={20}
-          color={colors.background_primary}
+          color={colors.icon_gray}
           style={styles.icon}
         />
       </TouchableOpacity>
 
-      {isOpen && (
-        <View style={styles.dropdown}>
-          {options.map(option => (
-            <TouchableOpacity
-              key={option.value}
-              style={[
-                styles.option,
-                value === option.value && styles.selectedOption,
-              ]}
-              onPress={() => {
-                onValueChange(option.value);
-                setIsOpen(false);
+      <Modal
+        visible={isOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsOpen(false)}
+      >
+        <TouchableOpacity activeOpacity={1} style={styles.overlay}>
+          <View style={styles.pickerContainer}>
+            <View style={styles.pickerHeader}>
+              <TouchableOpacity onPress={() => setIsOpen(false)}>
+                <Text style={styles.pickerDoneButton}>Done</Text>
+              </TouchableOpacity>
+            </View>
+            <Picker
+              selectedValue={value}
+              onValueChange={itemValue => {
+                onValueChange(itemValue);
               }}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  value === option.value && styles.selectedOptionText,
-                ]}
-              >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+              {options.map(option => (
+                <Picker.Item
+                  key={option.value}
+                  label={option.label}
+                  value={option.value}
+                />
+              ))}
+            </Picker>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: SPACING.sm,
+    marginBottom: spaces.small,
   },
   selectButton: {
     backgroundColor: colors.font_inverse,
     borderRadius: 8,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: spaces.base,
+    paddingVertical: spaces.base,
+    borderWidth: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.icon_light_gray,
   },
   focused: {
     borderColor: colors.background_primary,
@@ -115,7 +113,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   selectText: {
-    fontSize: 16,
     fontFamily: fonts.primary,
     color: colors.font_primary,
     flex: 1,
@@ -124,37 +121,38 @@ const styles = StyleSheet.create({
     color: colors.font_caption,
   },
   icon: {
-    marginLeft: SPACING.sm,
+    marginLeft: spaces.small,
   },
-  dropdown: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-end',
+  },
+  pickerContainer: {
     backgroundColor: colors.font_inverse,
-    borderRadius: 8,
-    marginTop: SPACING.xs,
-    borderWidth: 1,
-    borderColor: colors.icon_light_gray,
-    zIndex: 1000,
-    maxHeight: 250,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
-  option: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+  pickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: spaces.large,
+    paddingVertical: spaces.base,
     borderBottomWidth: 1,
     borderBottomColor: colors.icon_light_gray,
   },
-  selectedOption: {
-    backgroundColor: colors.background_secondary,
+  pickerDoneButton: {
+    fontSize: 16,
+    fontFamily: fonts.primary,
+    color: colors.background_primary,
   },
-  optionText: {
+  picker: {
+    height: 200,
+    backgroundColor: colors.font_inverse,
+  },
+  pickerItem: {
     fontSize: 16,
     fontFamily: fonts.primary,
     color: colors.font_primary,
-  },
-  selectedOptionText: {
-    fontFamily: fonts.heading,
-    color: colors.background_primary,
   },
 });

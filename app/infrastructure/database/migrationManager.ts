@@ -26,7 +26,7 @@ export const runMigrations = async (db: SQLite.SQLiteDatabase) => {
         await migration.up(db);
 
         await db.runAsync(
-          'INSERT INTO schema_migrations (version, name) VALUES (?, ?)',
+          'INSERT OR IGNORE INTO schema_migrations (version, name) VALUES (?, ?)',
           [migration.version, migration.name],
         );
 

@@ -4,6 +4,7 @@ import common from './locales/pt-br/common.json';
 import errors from './locales/pt-br/errors.json';
 import messages from './locales/pt-br/messages.json';
 import cashFlowListScreen from './locales/pt-br/cashFlowListScreen.json';
+import cashFlowFormScreen from './locales/pt-br/cashFlowFormScreen.json';
 
 const resources = {
   'pt-BR': {
@@ -11,6 +12,7 @@ const resources = {
     errors,
     messages,
     cashFlowListScreen,
+    cashFlowFormScreen,
   },
 };
 

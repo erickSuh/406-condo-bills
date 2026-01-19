@@ -3,22 +3,43 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../styles/colors';
 import fonts from '../../styles/fonts';
-import { minActions } from '@/styles/sizes';
+import sizes, { minActions } from '@/styles/sizes';
+import { useNavigation } from '@react-navigation/native';
+import spaces from '@/styles/spaces';
 
 interface HeaderProps {
   title: string;
   icon?: string;
   callToAction?: () => void;
+  showGoBack?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   title,
   icon = 'add',
   callToAction,
+  showGoBack = false,
 }) => {
+  const { goBack } = useNavigation();
+
+  const handleGoBack = () => {
+    goBack();
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.tileContainer}>
+        {showGoBack && (
+          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+            <Ionicons
+              name={'chevron-back'}
+              size={24}
+              color={colors.font_inverse}
+            />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.title}>{title}</Text>
+      </View>
       {callToAction && (
         <TouchableOpacity style={styles.button} onPress={callToAction}>
           <Ionicons name={icon as any} size={22} color={colors.font_inverse} />
@@ -36,6 +57,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     minHeight: minActions.action.minHeight,
     minWidth: minActions.action.minWidth,
+  },
+  tileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: spaces.base,
+    width: sizes.large,
+    height: sizes.large,
   },
   title: {
     fontSize: fonts.sizes.header,

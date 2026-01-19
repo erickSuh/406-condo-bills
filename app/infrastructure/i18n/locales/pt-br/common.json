@@ -1,14 +1,4 @@
 {
-  "search": "Pesquisar",
-  "delete": "Deletar",
-  "cancel": "Cancelar",
-  "confirm": "Confirmar",
-  "add": "Adicionar",
-  "edit": "Editar",
-  "save": "Salvar",
-  "close": "Fechar",
-  "loading": "Carregando...",
-  "error": "Erro",
-  "success": "Sucesso",
-  "noData": "Nenhum dado encontrado"
+  "Income": "Receita",
+  "Expense": "Despesa"
 }
