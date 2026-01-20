@@ -1,31 +1,73 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  globals: {
-    'ts-jest': {
-      tsconfig: {
-        noUnusedLocals: false,
-        noUnusedParameters: false,
-        jsx: 'react-jsx',
+  projects: [
+    {
+      displayName: 'react-native',
+      preset: 'react-native',
+      testEnvironment: 'node',
+      testMatch: [
+        '**/__tests__/**/*Screen.test.ts?(x)',
+        '**/?(*.)Screen.(spec|test).ts?(x)',
+      ],
+      transform: {
+        '^.+\\.(ts|tsx)$': [
+          'ts-jest',
+          {
+            tsconfig: {
+              noUnusedLocals: false,
+              noUnusedParameters: false,
+              jsx: 'react-jsx',
+            },
+          },
+        ],
+        '^.+\\.(js|jsx)$': 'babel-jest',
       },
+      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/app/$1',
+      },
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      transformIgnorePatterns: [
+        'node_modules/(?!(expo-sqlite-mock|expo|expo-font|expo-splash-screen|expo-sqlite|@expo|@react-native|react-native|react-native-screens|react-native-safe-area-context|@react-navigation)/)',
+      ],
     },
-  },
-  roots: ['<rootDir>'],
-  testMatch: ['**/__tests__/**/*.test.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/app/$1',
-  },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+    {
+      displayName: 'hooks',
+      preset: 'react-native',
+      testEnvironment: 'jsdom',
+      testMatch: [
+        '**/__tests__/**/*.test.ts?(x)',
+        '!**/__tests__/**/*Screen.test.ts?(x)',
+        '!**/__tests__/**/?(*.)Screen.(spec|test).ts?(x)',
+      ],
+      transform: {
+        '^.+\\.(ts|tsx)$': [
+          'ts-jest',
+          {
+            tsconfig: {
+              noUnusedLocals: false,
+              noUnusedParameters: false,
+              jsx: 'react-jsx',
+            },
+          },
+        ],
+        '^.+\\.(js|jsx)$': 'babel-jest',
+      },
+      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/app/$1',
+      },
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      transformIgnorePatterns: [
+        'node_modules/(?!(expo-sqlite-mock|expo|expo-font|expo-splash-screen|expo-sqlite|@expo|@react-native|react-native|react-native-screens|react-native-safe-area-context|@react-navigation)/)',
+      ],
+    },
+  ],
   collectCoverageFrom: [
     'app/**/*.{ts,tsx}',
     '!app/**/*.d.ts',
     '!app/**/index.ts',
   ],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.expo/'],
-  transformIgnorePatterns: [
-    'node_modules/(?!(expo|expo-font|expo-splash-screen|expo-sqlite|@expo|@react-native|react-native|react-native-screens|react-native-safe-area-context|@react-navigation)/)',
-  ],
   coverageThreshold: {
     global: {
       branches: 15,

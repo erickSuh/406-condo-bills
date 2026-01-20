@@ -65,14 +65,19 @@ export const CashFlowListScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Header
-          title={t('title', { ns: 'cashFlowListScreen' })}
+          title={t('title', {
+            ns: 'cashFlowListScreen',
+            defaultValue: 'Plano de Contas',
+          })}
           icon="add"
           callToAction={handleNavigateToForm}
         />
 
         <Input
+          testID={'search-input'}
           placeholder={t('searchInputPlaceholder', {
             ns: 'cashFlowListScreen',
+            defaultValue: 'Pesquisar conta',
           })}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -85,11 +90,16 @@ export const CashFlowListScreen: React.FC = () => {
       <View style={styles.content}>
         <View style={styles.listHeader}>
           <Text style={styles.listHeaderTitle}>
-            {t('listHeader', { ns: 'cashFlowListScreen' })}
+            {t('listHeader', {
+              ns: 'cashFlowListScreen',
+              defaultValue: 'Listagem',
+            })}
           </Text>
           <Text style={styles.listHeaderCount}>
             {t('listHeaderRegistryCount', {
               count: filteredItems.length,
+              ns: 'cashFlowListScreen',
+              defaultValue: `${filteredItems.length} registros`,
             })}
           </Text>
         </View>
@@ -102,7 +112,10 @@ export const CashFlowListScreen: React.FC = () => {
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
-                {t('emptyListMessage', { ns: 'cashFlowListScreen' })}
+                {t('emptyListMessage', {
+                  ns: 'cashFlowListScreen',
+                  defaultValue: 'Nenhuma conta encontrada',
+                })}
               </Text>
             </View>
           }

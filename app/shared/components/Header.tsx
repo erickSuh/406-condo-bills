@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import spaces from '@/styles/spaces';
 
 interface HeaderProps {
+  testID?: string;
   title: string;
   icon?: string;
   callToAction?: () => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  testID,
   title,
   icon = 'add',
   callToAction,
@@ -27,10 +29,14 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={testID}>
       <View style={styles.tileContainer}>
         {showGoBack && (
-          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={handleGoBack}
+            testID="back-button"
+          >
             <Ionicons
               name={'chevron-back'}
               size={24}
@@ -41,7 +47,11 @@ export const Header: React.FC<HeaderProps> = ({
         <Text style={styles.title}>{title}</Text>
       </View>
       {callToAction && (
-        <TouchableOpacity style={styles.button} onPress={callToAction}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={callToAction}
+          testID="header-action-button"
+        >
           <Ionicons name={icon as any} size={22} color={colors.font_inverse} />
         </TouchableOpacity>
       )}
