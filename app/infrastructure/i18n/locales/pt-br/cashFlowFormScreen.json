@@ -10,6 +10,11 @@
   "selectType": "Selecione o tipo",
   "acceptsEntries": "Aceita lançamentos",
   "selectAcceptsEntries": "Selecione",
-  "cancel": "Cancelar",
-  "save": "Salvar"
+  "errorRequiredField": "Este campo é obrigatório",
+  "errorInvalidCodeFormat": "O código deve ter exatamente {{expectedDepth}} segmentos (ex: \"{{expectedPrefix}}1\")",
+  "errorExistingCode": "Este código já existe",
+  "errorCodePrefix": "O código deve começar com \"{{expectedPrefix}}\"",
+  "errorCodeBeEmpty": "O código não pode estar vazio",
+  "deleteCancel": "Não!",
+  "deleteConfirm": "Com certeza"
 }

@@ -1,78 +1,64 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { View, StyleSheet, FlatList, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import { Controller } from 'react-hook-form';
 import colors from '@/styles/colors';
 import fonts from '@/styles/fonts';
 import spaces from '@/styles/spaces';
-import { Header, Input, Button, Load } from '@/shared/components';
-import { Select, SelectOption } from '@/shared/components/Select';
-import { useCashFlowForm } from '../hooks/useCashFlowForm';
+import { Header, Input, Load } from '@/shared/components';
+import { Select } from '@/shared/components/Select';
+import { useCashFlowFormScreen } from '../hooks/useCashFlowFormScreen';
+import { CASH_FLOW_FORM_NAMESPACE } from '../constants';
 
 export const CashFlowFormScreen: React.FC = () => {
-  const { t } = useTranslation('cashFlowFormScreen');
-  const { control, errors, handleSubmit, isLoading } = useCashFlowForm();
+  const {
+    control,
+    errors,
+    handleSubmit,
+    isLoading,
+    parentItems,
+    flowTypes,
+    acceptsEntriesOptions,
+    watch,
+    validateCode,
+    parentCode,
+    t,
+  } = useCashFlowFormScreen();
 
-  const parentAccountOptions: SelectOption[] = useMemo(
-    () => [
-      { label: '1 - Receitas', value: '1' },
-      { label: '2 - Despesas', value: '2' },
-    ],
-    [],
+  const parentAccountId = watch('parentAccountId');
+  const isTypeDisabled = !!parentAccountId;
+
+  const formData = useMemo(
+    () => ({
+      parentAccountId,
+      isTypeDisabled,
+      parentCode,
+      validateCode,
+    }),
+    [parentAccountId, isTypeDisabled, parentCode, validateCode],
   );
 
-  const typeOptions: SelectOption[] = useMemo(
-    () => [
-      { label: 'Receita', value: '0' },
-      { label: 'Despesa', value: '1' },
-    ],
-    [],
-  );
-
-  const acceptsEntriesOptions: SelectOption[] = useMemo(
-    () => [
-      { label: 'Sim', value: '1' },
-      { label: 'Não', value: '0' },
-    ],
-    [],
-  );
-
-  const handleFormSubmit = handleSubmit;
-
-  if (isLoading) {
-    return <Load />;
-  }
-
-  return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <View style={styles.header}>
-        <Header
-          title={t('title', { defaultValue: 'Inserir Conta' })}
-          icon="checkmark"
-          callToAction={handleFormSubmit}
-        />
-      </View>
-
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+  const renderFormContent = useCallback(
+    () => (
+      <>
         <View style={styles.formSection}>
           <Text style={styles.label}>
-            {t('parentAccount', { defaultValue: 'Conta pai' })}
+            {t('parentAccount', {
+              defaultValue: 'Conta pai',
+              ns: CASH_FLOW_FORM_NAMESPACE,
+            })}
           </Text>
           <Controller
             control={control}
             name="parentAccountId"
             render={({ field: { value, onChange } }) => (
               <Select
-                options={parentAccountOptions}
+                options={parentItems}
                 value={value}
                 onValueChange={onChange}
                 placeholder={t('selectParentAccount', {
-                  defaultValue: 'Select parent account',
+                  defaultValue: 'Selecione a conta',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
               />
             )}
@@ -81,43 +67,69 @@ export const CashFlowFormScreen: React.FC = () => {
 
         <View style={styles.formSection}>
           <Text style={styles.label}>
-            {t('code', { defaultValue: 'Código' })}
+            {t('code', {
+              defaultValue: 'Código',
+              ns: CASH_FLOW_FORM_NAMESPACE,
+            })}
           </Text>
           <Controller
             control={control}
             name="code"
-            rules={{ required: 'Code is required' }}
-            render={({ field: { value, onChange } }) => (
-              <>
-                <Input
-                  placeholder={t('codePlaceholder', {
-                    defaultValue: 'Ex: 1.1',
-                  })}
-                  value={value}
-                  onChangeText={onChange}
-                  maxLength={20}
-                />
-                {errors.code && (
-                  <Text style={styles.error}>{errors.code.message}</Text>
-                )}
-              </>
-            )}
+            rules={{
+              required: 'Code is required',
+              validate: formData.validateCode,
+            }}
+            render={({ field: { value, onChange } }) => {
+              const prefix = formData.parentCode
+                ? `${formData.parentCode}.`
+                : '';
+              const handleCodeChange = (text: string) => {
+                if (prefix && !text.startsWith(prefix)) {
+                  onChange(prefix);
+                } else {
+                  onChange(text);
+                }
+              };
+
+              return (
+                <>
+                  <Input
+                    placeholder={t('codePlaceholder', {
+                      defaultValue: 'Ex: 1.1',
+                      ns: CASH_FLOW_FORM_NAMESPACE,
+                    })}
+                    value={value || prefix}
+                    onChangeText={handleCodeChange}
+                    maxLength={20}
+                  />
+                  {errors.code && (
+                    <Text style={styles.error}>{errors.code.message}</Text>
+                  )}
+                </>
+              );
+            }}
           />
         </View>
 
         <View style={styles.formSection}>
           <Text style={styles.label}>
-            {t('name', { defaultValue: 'Nome' })}
+            {t('name', { defaultValue: 'Nome', ns: CASH_FLOW_FORM_NAMESPACE })}
           </Text>
           <Controller
             control={control}
             name="title"
-            rules={{ required: 'Name is required' }}
+            rules={{
+              required: t('errorRequiredField', {
+                defaultValue: 'Este campo é obrigatório',
+                ns: CASH_FLOW_FORM_NAMESPACE,
+              }),
+            }}
             render={({ field: { value, onChange } }) => (
               <>
                 <Input
                   placeholder={t('namePlaceholder', {
-                    defaultValue: 'Account name',
+                    defaultValue: 'Nome da conta',
+                    ns: CASH_FLOW_FORM_NAMESPACE,
                   })}
                   value={value}
                   onChangeText={onChange}
@@ -133,17 +145,21 @@ export const CashFlowFormScreen: React.FC = () => {
 
         <View style={styles.formSection}>
           <Text style={styles.label}>
-            {t('type', { defaultValue: 'Tipo' })}
+            {t('type', { defaultValue: 'Tipo', ns: CASH_FLOW_FORM_NAMESPACE })}
           </Text>
           <Controller
             control={control}
             name="type"
             render={({ field: { value, onChange } }) => (
               <Select
-                options={typeOptions}
+                options={flowTypes}
                 value={value}
                 onValueChange={onChange}
-                placeholder={t('selectType', { defaultValue: 'Select type' })}
+                placeholder={t('selectType', {
+                  defaultValue: 'Select type',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })}
+                editable={!formData.isTypeDisabled}
               />
             )}
           />
@@ -151,7 +167,10 @@ export const CashFlowFormScreen: React.FC = () => {
 
         <View style={styles.formSection}>
           <Text style={styles.label}>
-            {t('acceptsEntries', { defaultValue: 'Aceita lançamentos' })}
+            {t('acceptsEntries', {
+              defaultValue: 'Aceita lançamentos',
+              ns: CASH_FLOW_FORM_NAMESPACE,
+            })}
           </Text>
           <Controller
             control={control}
@@ -163,25 +182,53 @@ export const CashFlowFormScreen: React.FC = () => {
                 onValueChange={onChange}
                 placeholder={t('selectAcceptsEntries', {
                   defaultValue: 'Select',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
               />
             )}
           />
         </View>
+      </>
+    ),
+    [
+      t,
+      control,
+      errors,
+      parentItems,
+      flowTypes,
+      acceptsEntriesOptions,
+      formData,
+    ],
+  );
 
-        <View style={styles.buttonSection}>
-          <Button
-            title={t('cancel', { defaultValue: 'Cancel' })}
-            variant="secondary"
-            onPress={() => handleSubmit(async () => {})}
-          />
-          <Button
-            title={t('save', { defaultValue: 'Save' })}
-            variant="primary"
-            onPress={handleFormSubmit}
-          />
-        </View>
-      </ScrollView>
+  if (isLoading) {
+    return <Load />;
+  }
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <View style={styles.header}>
+        <Header
+          title={t('title', {
+            defaultValue: 'Inserir Conta',
+            ns: CASH_FLOW_FORM_NAMESPACE,
+          })}
+          icon="checkmark"
+          callToAction={handleSubmit}
+          showGoBack
+        />
+      </View>
+
+      <FlatList
+        scrollEnabled={true}
+        data={[{ key: 'form' }]}
+        renderItem={renderFormContent}
+        keyExtractor={item => item.key}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled={true}
+        scrollEventThrottle={16}
+      />
     </SafeAreaView>
   );
 };
@@ -192,24 +239,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background_primary,
   },
   header: {
-    backgroundColor: colors.background_primary,
-    paddingHorizontal: spaces.base,
-    paddingVertical: spaces.base,
-  },
-  content: {
-    flex: 1,
+    paddingHorizontal: spaces.large,
+    paddingTop: spaces.base,
   },
   scrollContent: {
-    paddingHorizontal: spaces.base,
+    flex: 1,
+    paddingTop: 24,
+    backgroundColor: colors.background_secondary,
+    paddingHorizontal: 24,
     paddingVertical: spaces.base,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
   },
   formSection: {
-    marginBottom: spaces.large,
+    marginBottom: spaces.small,
   },
   label: {
-    fontSize: 14,
-    fontFamily: fonts.heading,
-    color: colors.font_header,
+    fontSize: fonts.sizes.base,
+    fontFamily: fonts.label,
+    color: colors.font_label,
     marginBottom: spaces.small,
   },
   error: {

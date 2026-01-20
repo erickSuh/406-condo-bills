@@ -1,42 +1,111 @@
 /* eslint-disable no-undef */
 // jest.setup.js
-const React = require('react');
 
-// Mock React Native
-jest.mock('react-native', () => {
-  return {
-    View: React.forwardRef(function View(props, ref) {
-      const View = viewProps => React.createElement('div', viewProps);
-      View.displayName = 'MockView';
-      return React.createElement(View, { ...props, ref });
-    }),
-    Text: React.forwardRef(function Text(props, ref) {
-      const Text = textProps => React.createElement('span', textProps);
-      Text.displayName = 'MockText';
-      return React.createElement(Text, { ...props, ref });
-    }),
-    StyleSheet: {
-      create: styles => styles,
-    },
-    TextInput: React.forwardRef(function TextInput(props, ref) {
-      const TextInput = inputProps => React.createElement('input', inputProps);
-      TextInput.displayName = 'MockTextInput';
-      return React.createElement(TextInput, { ...props, ref });
-    }),
-    TouchableOpacity: React.forwardRef(function TouchableOpacity(props, ref) {
-      const TouchableOpacity = touchProps =>
-        React.createElement('div', touchProps);
-      TouchableOpacity.displayName = 'MockTouchableOpacity';
-      return React.createElement(TouchableOpacity, { ...props, ref });
-    }),
-  };
-});
+// Set up __DEV__ global for modules that check it at import time
+global.__DEV__ = false;
 
-// Mock Expo modules
+// Mock font loading first - needed before components render
+jest.mock('@expo-google-fonts/roboto', () => ({
+  useFonts: () => [true],
+}));
+
+jest.mock('@expo-google-fonts/rubik', () => ({
+  useFonts: () => [true],
+}));
+
+// Mock only external dependencies that don't work in test environment
+// DO NOT mock react-native - use native testing with react-test-renderer
+
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }));
 
-jest.mock('expo-sqlite', () => ({
-  openDatabaseAsync: jest.fn(),
+// Mock expo-sqlite - use the actual expo-sqlite-mock module
+jest.mock('expo-sqlite', () => {
+  try {
+    // Try to get the actual expo-sqlite-mock module
+    return require('expo-sqlite-mock');
+  } catch (e) {
+    // Fallback mock if package not found
+    return {
+      openDatabaseAsync: jest.fn().mockResolvedValue({
+        execAsync: jest.fn(),
+        runAsync: jest.fn(),
+        getAllAsync: jest.fn().mockResolvedValue([]),
+        getFirstAsync: jest.fn(),
+        closeAsync: jest.fn(),
+        transactionAsync: jest.fn(),
+      }),
+    };
+  }
+});
+
+// Mock react-navigation to prevent initialization issues
+jest.mock('@react-navigation/native', () => {
+  const actualNav = jest.requireActual('@react-navigation/native');
+  return {
+    ...actualNav,
+    NavigationContainer: ({ children }) => children,
+    useNavigation: () => ({
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+    }),
+    useFocusEffect: callback => callback(),
+    useIsFocused: jest.fn(() => true),
+  };
+});
+
+jest.mock('@react-navigation/native-stack', () => ({
+  createNativeStackNavigator: jest.fn(() => ({
+    Navigator: ({ children }) => <>{children}</>,
+    Screen: ({ children }) => <>{children}</>,
+  })),
 }));
+
+// Mock i18n initialization
+jest.mock('./app/infrastructure/i18n', () => ({}));
+
+// Mock react-i18next for translations - CRITICAL for text rendering
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key, options) => options?.defaultValue || key,
+    i18n: {
+      changeLanguage: jest.fn(),
+      language: 'pt-BR',
+    },
+  }),
+  initReactI18next: {
+    type: '3rdParty',
+    init: jest.fn(),
+  },
+}));
+
+// import 'react-native-gesture-handler/jestSetup';
+// import { setUpTests } from 'react-native-reanimated';
+// setUpTests();
+
+import { jest } from '@jest/globals';
+
+// jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+
+// Include this section for mocking react-native-screens
+jest.mock('react-native-screens', () => {
+  // Require actual module instead of a mock
+  let screens = jest.requireActual('react-native-screens');
+
+  // All exports in react-native-screens are getters
+  // We cannot use spread for cloning as it will call the getters
+  // So we need to clone it with Object.create
+  screens = Object.create(
+    Object.getPrototypeOf(screens),
+    Object.getOwnPropertyDescriptors(screens),
+  );
+
+  // Add mock of the component you need
+  // Here is the example of mocking the Screen component as a View
+  Object.defineProperty(screens, 'Screen', {
+    value: require('react-native').View,
+  });
+
+  return screens;
+});

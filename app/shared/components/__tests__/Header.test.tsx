@@ -2,6 +2,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Header } from '../Header';
 
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({
+    goBack: jest.fn(),
+  }),
+}));
+
 describe('Header Component', () => {
   it('renders without crashing', () => {
     const { container } = render(

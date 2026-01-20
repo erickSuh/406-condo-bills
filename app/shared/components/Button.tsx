@@ -7,8 +7,9 @@ import {
 } from 'react-native';
 import colors from '../../styles/colors';
 import fonts from '../../styles/fonts';
+import spaces from '@/styles/spaces';
 
-type ButtonVariant = 'primary' | 'secondary';
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
@@ -46,14 +47,18 @@ const styles = (variant: ButtonVariant, color: string) =>
       alignItems: 'center',
       borderRadius: 12,
       height: 48,
-      paddingHorizontal: 24,
+      paddingHorizontal: spaces.base,
       borderWidth: variant === 'secondary' ? 2 : 0,
       borderColor: variant === 'secondary' ? colors.font_label : 'transparent',
     },
     text: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: variant === 'primary' ? colors.font_inverse : colors.font_label,
-      fontFamily: fonts.heading,
+      fontSize: fonts.sizes.base,
+      color:
+        variant === 'primary'
+          ? colors.font_inverse
+          : variant === 'tertiary'
+            ? colors.red
+            : colors.font_label,
+      fontFamily: fonts.primary,
     },
   });

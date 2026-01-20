@@ -9,6 +9,8 @@ export default {
   font_inverse: '#FFFFFF',
   font_header: '#3D3D4C',
 
+  icon_gray: '#747474',
+
   icon_light_gray: '#C4C4D1',
 
   green: '#1BA803',
@@ -18,4 +20,6 @@ export default {
   blue: '#9494ff',
 
   red: '#FF6680',
+
+  black: '#000000',
 };

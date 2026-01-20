@@ -21,9 +21,9 @@ export const migration_001_create_tables: Migration = {
     `);
 
     await db.execAsync(`
-      INSERT INTO flow_types (label) VALUES
-      ('Income'),
-      ('Expense');
+      INSERT OR IGNORE INTO flow_types (id, label) VALUES
+      (0, 'Income'),
+      (1, 'Expense');
     `);
 
     await db.execAsync(`
@@ -32,11 +32,21 @@ export const migration_001_create_tables: Migration = {
         code TEXT NOT NULL,
         title TEXT NOT NULL,
         type INTEGER NOT NULL DEFAULT 0,
+        parent_id INTEGER,
+        accepts_entries INTEGER NOT NULL DEFAULT 0,
         deleted INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(type) REFERENCES flow_types(id)
       );
+    `);
+
+    await db.execAsync(`
+      INSERT OR IGNORE INTO cash_flow (code, title, type, accepts_entries) VALUES
+      ('1', 'Receita', 0, 0),
+      ('2', 'Despesa', 1, 0),
+      ('3', 'Despesas bancárias', 1, 0),
+      ('4', 'Outras receitas', 0, 0);
     `);
   },
   down: async (db: SQLite.SQLiteDatabase) => {
@@ -45,18 +55,4 @@ export const migration_001_create_tables: Migration = {
   },
 };
 
-export const migration_002_create_tables: Migration = {
-  version: 2,
-  name: 'add_test_data',
-  up: async (db: SQLite.SQLiteDatabase) => {
-    await db.execAsync(`
-      INSERT INTO cash_flow (code, title, type) VALUES
-      ('1', 'Title teste', 0);
-    `);
-  },
-};
-
-export const migrations: Migration[] = [
-  migration_001_create_tables,
-  migration_002_create_tables,
-];
+export const migrations: Migration[] = [migration_001_create_tables];
