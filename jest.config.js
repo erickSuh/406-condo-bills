@@ -66,14 +66,16 @@ module.exports = {
     'app/**/*.{ts,tsx}',
     '!app/**/*.d.ts',
     '!app/**/index.ts',
+    '!app/**/*.test.ts',
+    '!app/**/*.test.tsx',
   ],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.expo/'],
   coverageThreshold: {
     global: {
-      branches: 15,
-      functions: 7,
-      lines: 8,
-      statements: 9,
+      branches: 50,
+      functions: 50,
+      lines: 50,
+      statements: 50,
     },
   },
 };
