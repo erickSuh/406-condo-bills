@@ -17,6 +17,7 @@
   "errorCodePrefix": "O código deve começar com \"{{expectedPrefix}}\"",
   "errorCodeBeEmpty": "O código não pode estar vazio",
   "errorSegmentsLimit": "Cada segmento do código não pode ser maior que 999",
+  "errorCodeFormat": "O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)",
   "deleteCancel": "Não!",
   "deleteConfirm": "Com certeza"
 }

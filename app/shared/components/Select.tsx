@@ -100,15 +100,33 @@ export const Select: React.FC<SelectProps> = ({
         </View>
       ) : (
         <View style={[styles.container, style]}>
-          <View style={styles.androidPickerWrapper}>
+          <TouchableOpacity
+            disabled={!editable}
+            activeOpacity={0.7}
+            style={[styles.selectButton, !editable && styles.disabled]}
+          >
+            <Text
+              style={[styles.selectText, !selectedOption && styles.placeholder]}
+              numberOfLines={1}
+            >
+              {displayText}
+            </Text>
+            <Ionicons
+              name="caret-down-outline"
+              size={20}
+              color={colors.icon_gray}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+
+          <View style={styles.invisiblePickerWrapper}>
             <Picker
               enabled={editable}
               selectedValue={value}
               onValueChange={itemValue => {
                 onValueChange(itemValue);
               }}
-              style={styles.androidPicker}
-              itemStyle={styles.androidPickerItem}
+              style={styles.invisiblePicker}
             >
               {options.map(option => (
                 <Picker.Item
@@ -132,7 +150,7 @@ const styles = StyleSheet.create({
   selectButton: {
     backgroundColor: colors.font_inverse,
     borderRadius: 8,
-    paddingHorizontal: spaces.base,
+    paddingHorizontal: Platform.OS === 'ios' ? spaces.base : spaces.large,
     paddingVertical: spaces.base,
     borderWidth: 0,
     flexDirection: 'row',
@@ -175,7 +193,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.icon_light_gray,
   },
   pickerDoneButton: {
-    fontSize: 16,
+    fontSize: fonts.sizes.large,
     fontFamily: fonts.primary,
     color: colors.background_primary,
   },
@@ -183,25 +201,19 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: colors.font_inverse,
   },
-  androidPicker: {
-    backgroundColor: colors.font_inverse,
-    color: colors.font_label,
-  },
-  androidPickerWrapper: {
-    borderRadius: 8,
-    overflow: 'hidden',
-    color: colors.font_inverse,
-    height: 43,
-    justifyContent: 'center',
-  },
   pickerItem: {
-    fontSize: 16,
+    fontSize: fonts.sizes.base,
     fontFamily: fonts.primary,
     color: colors.font_primary,
   },
-  androidPickerItem: {
-    fontSize: 16,
-    fontFamily: fonts.primary,
-    color: colors.font_primary,
+  invisiblePickerWrapper: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    opacity: 0,
+  },
+  invisiblePicker: {
+    width: '100%',
+    height: '100%',
   },
 });

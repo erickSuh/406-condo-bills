@@ -33,7 +33,7 @@ describe('useCashFlowForm', () => {
     const { result } = renderHook(() => useCashFlowFormScreen());
 
     expect(result.current.control._formValues).toEqual({
-      parentAccountId: '1',
+      parentAccountId: undefined,
       code: '',
       title: '',
       type: '0',
@@ -81,7 +81,7 @@ describe('useCashFlowForm', () => {
   it('should have parentAccountId field', () => {
     const { result } = renderHook(() => useCashFlowFormScreen());
 
-    expect(result.current.control._formValues.parentAccountId).toBeDefined();
+    expect(result.current.control._formValues.parentAccountId).toBeUndefined();
   });
 
   it('should provide handleSubmit function', () => {

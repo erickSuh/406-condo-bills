@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet, FlatList, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
@@ -19,37 +19,13 @@ export const CashFlowFormScreen: React.FC = () => {
     parentItems,
     flowTypes,
     acceptsEntriesOptions,
-    watch,
     validateCode,
-    parentCode,
+    suggestedPrefix,
     t,
-    setValue,
+    isTypeDisabled,
     isReadOnly,
     itemToView,
   } = useCashFlowFormScreen();
-
-  useEffect(() => {
-    if (itemToView && isReadOnly) {
-      setValue('code', itemToView.code);
-      setValue('title', itemToView.title);
-      setValue('type', String(itemToView.type));
-      setValue('parentAccountId', String(itemToView.parent_id));
-      setValue('acceptsEntries', itemToView.accepts_entries);
-    }
-  }, [itemToView, isReadOnly, setValue]);
-
-  const parentAccountId = watch('parentAccountId');
-  const isTypeDisabled = !!parentAccountId;
-
-  const formData = useMemo(
-    () => ({
-      parentAccountId,
-      isTypeDisabled,
-      parentCode,
-      validateCode,
-    }),
-    [parentAccountId, isTypeDisabled, parentCode, validateCode],
-  );
 
   const renderFormContent = useCallback(
     () => (
@@ -91,18 +67,20 @@ export const CashFlowFormScreen: React.FC = () => {
             name="code"
             rules={{
               required: 'Code is required',
-              validate: formData.validateCode,
+              validate: validateCode,
             }}
             render={({ field: { value, onChange } }) => {
               const newValue = value
                 .replaceAll(',', '.')
                 .replaceAll(/[^0-9.]/g, '');
-              const prefix = formData.parentCode
-                ? `${formData.parentCode}.`
-                : '';
+
               const handleCodeChange = (text: string) => {
-                if (prefix && !text.startsWith(prefix)) {
-                  onChange(prefix);
+                if (isReadOnly) {
+                  return;
+                }
+
+                if (suggestedPrefix && !text.startsWith(suggestedPrefix)) {
+                  onChange(suggestedPrefix);
                 } else {
                   onChange(text);
                 }
@@ -115,7 +93,7 @@ export const CashFlowFormScreen: React.FC = () => {
                       defaultValue: 'Ex: 1.1',
                       ns: CASH_FLOW_FORM_NAMESPACE,
                     })}
-                    value={newValue || prefix}
+                    value={newValue || suggestedPrefix}
                     onChangeText={handleCodeChange}
                     maxLength={20}
                     editable={!isReadOnly}
@@ -179,7 +157,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Select type',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={!formData.isTypeDisabled && !isReadOnly}
+                editable={!isTypeDisabled && !isReadOnly}
               />
             )}
           />
@@ -218,8 +196,10 @@ export const CashFlowFormScreen: React.FC = () => {
       parentItems,
       flowTypes,
       acceptsEntriesOptions,
-      formData,
       isReadOnly,
+      suggestedPrefix,
+      isTypeDisabled,
+      validateCode,
     ],
   );
 

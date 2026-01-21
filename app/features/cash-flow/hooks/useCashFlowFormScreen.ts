@@ -27,6 +27,7 @@ export interface CashFlowFormData {
 const suggestNextCode = (
   parentCode: string,
   childrenCodes: string[],
+  allCashFlows: CashFlowItem[],
 ): string => {
   const parentSegments = parentCode.split('.');
   const requiredDepth = parentSegments.length + 1;
@@ -53,15 +54,38 @@ const suggestNextCode = (
   const nextSegment = maxSegment + 1;
 
   if (nextSegment > 999) {
-    const segments = parentCode.split('.');
-    return segments
-      .map((seg, index) => {
-        if (index === segments.length - 1) {
-          return String(Number(seg) + 1);
+    let newParentSegments = [...parentSegments];
+    let levelIndex = newParentSegments.length - 1;
+
+    while (levelIndex >= 0) {
+      const currentValue = Number(newParentSegments[levelIndex]);
+
+      if (currentValue < 999) {
+        newParentSegments[levelIndex] = String(currentValue + 1);
+        newParentSegments = newParentSegments.slice(0, levelIndex + 1);
+
+        let newCode = newParentSegments.join('.');
+
+        let attempts = 0;
+        while (attempts < 999) {
+          const codeExists = allCashFlows.some(item => item.code === newCode);
+          if (!codeExists) {
+            return newCode;
+          }
+
+          const segments = newCode.split('.');
+          segments[segments.length - 1] = String(
+            Number(segments[segments.length - 1]) + 1,
+          );
+          newCode = segments.join('.');
+          attempts++;
         }
-        return seg;
-      })
-      .join('.');
+
+        return newCode;
+      }
+
+      levelIndex--;
+    }
   }
 
   return `${parentCode}.${nextSegment}`;
@@ -83,6 +107,7 @@ export const useCashFlowFormScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [parentItems, setParentItems] = useState<CashFlowItem[]>([]);
   const [flowTypes, setFlowTypes] = useState<FlowType[]>([]);
+  const [suggestedPrefix, setSuggestedPrefix] = useState<string>('');
   const { t } = useTranslation([CASH_FLOW_FORM_NAMESPACE, 'common']);
   const { goBack } = useNavigation();
 
@@ -95,7 +120,7 @@ export const useCashFlowFormScreen = () => {
     watch,
   } = useForm<CashFlowFormData>({
     defaultValues: {
-      parentAccountId: '1',
+      parentAccountId: undefined,
       code: '',
       title: '',
       type: '0',
@@ -104,6 +129,10 @@ export const useCashFlowFormScreen = () => {
   });
 
   const parentAccountIdValue = watch('parentAccountId');
+
+  const isTypeDisabled = useMemo(() => {
+    return !!parentAccountIdValue;
+  }, [parentAccountIdValue]);
 
   const refetchItems = useCallback(async () => {
     if (!db) return;
@@ -149,10 +178,21 @@ export const useCashFlowFormScreen = () => {
           .filter(item => item.code.startsWith(parentItem.code + '.'))
           .map(item => item.code);
 
-        const suggested = suggestNextCode(parentItem.code, childrenCodes);
+        const suggested = suggestNextCode(
+          parentItem.code,
+          childrenCodes,
+          allCashFlows,
+        );
 
         if (suggested) {
           setValue('code', suggested);
+
+          const segments = suggested.split('.');
+          if (segments.length > 1) {
+            setSuggestedPrefix(segments.slice(0, -1).join('.') + '.');
+          } else {
+            setSuggestedPrefix('');
+          }
         }
 
         setValue('type', String(parentItem.type));
@@ -173,7 +213,16 @@ export const useCashFlowFormScreen = () => {
         });
       }
 
-      if (!db || !parentAccountIdValue) {
+      const codeFormatRegex = /^\d{1,3}(\.\d{1,3})*$/;
+      if (!codeFormatRegex.test(code)) {
+        return t('errorCodeFormat', {
+          ns: CASH_FLOW_FORM_NAMESPACE,
+          defaultValue:
+            'O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)',
+        });
+      }
+
+      if (!db) {
         return true;
       }
 
@@ -183,40 +232,19 @@ export const useCashFlowFormScreen = () => {
           item => item.id === Number(parentAccountIdValue),
         );
 
-        if (!parentItem) {
-          return true;
-        }
-
-        const expectedPrefix = parentItem.code + '.';
-        if (!code.startsWith(expectedPrefix)) {
-          return t('errorCodePrefix', {
-            ns: CASH_FLOW_FORM_NAMESPACE,
-            defaultValue: `O código deve começar com "${expectedPrefix}"`,
-            expectedPrefix,
-          });
-        }
-
-        const parentSegments = parentItem.code.split('.');
-        const codeSegments = code.split('.');
-        const expectedDepth = parentSegments.length + 1;
-        if (codeSegments.length !== expectedDepth) {
-          return t('errorInvalidCodeFormat', {
-            ns: CASH_FLOW_FORM_NAMESPACE,
-            defaultValue: `O código deve ter exatamente ${expectedDepth} segmentos (ex: "${expectedPrefix}1")`,
-            expectedDepth,
-            expectedPrefix,
-          });
-        }
-
-        const invalidSegment = codeSegments.find(segment => {
-          const num = parseInt(segment, 10);
-          return isNaN(num) || num > 999;
-        });
-        if (invalidSegment) {
-          return t('errorSegmentsLimit', {
-            ns: CASH_FLOW_FORM_NAMESPACE,
-            defaultValue: 'Cada segmento do código não pode ser maior que 999',
-          });
+        if (parentItem) {
+          const expectedPrefix = parentItem.code + '.';
+          const parentSegments = parentItem.code.split('.');
+          const codeSegments = code.split('.');
+          const expectedDepth = parentSegments.length + 1;
+          if (codeSegments.length !== expectedDepth) {
+            return t('errorInvalidCodeFormat', {
+              ns: CASH_FLOW_FORM_NAMESPACE,
+              defaultValue: `O código deve ter exatamente ${expectedDepth} segmentos (ex: "${expectedPrefix}1")`,
+              expectedDepth,
+              expectedPrefix,
+            });
+          }
         }
 
         const allCashFlows = await repository.getCashFlows();
@@ -312,22 +340,30 @@ export const useCashFlowFormScreen = () => {
     [flowTypes, t],
   );
 
-  const formattedParentItems: SelectOption[] = useMemo(
-    () =>
-      parentItems.map(item => ({
-        label: `${item.code} - ${item.title}`,
-        value: String(item.id),
-      })),
-    [parentItems],
-  );
+  const formattedParentItems: SelectOption[] = useMemo(() => {
+    const formattedParents = parentItems.map(item => ({
+      label: `${item.code} - ${item.title}`,
+      value: String(item.id),
+    }));
+    formattedParents.unshift({
+      label: t('noParentAccount', {
+        defaultValue: 'Sem conta pai',
+        ns: CASH_FLOW_FORM_NAMESPACE,
+      }),
+      value: '',
+    });
+    return formattedParents;
+  }, [parentItems, t]);
 
-  const parentCode = useMemo(() => {
-    if (!parentAccountIdValue) return '';
-    const parent = parentItems.find(
-      item => item.id === Number(parentAccountIdValue),
-    );
-    return parent ? parent.code : '';
-  }, [parentAccountIdValue, parentItems]);
+  useEffect(() => {
+    if (itemToView && isReadOnly) {
+      setValue('code', itemToView.code);
+      setValue('title', itemToView.title);
+      setValue('type', String(itemToView.type));
+      setValue('parentAccountId', String(itemToView.parent_id));
+      setValue('acceptsEntries', itemToView.accepts_entries);
+    }
+  }, [itemToView, isReadOnly, setValue]);
 
   useEffect(() => {
     if (isReady && db) {
@@ -345,10 +381,10 @@ export const useCashFlowFormScreen = () => {
     flowTypes: formattedFlowTypes,
     acceptsEntriesOptions,
     t,
-    setValue,
     watch,
     validateCode,
-    parentCode,
+    suggestedPrefix,
+    isTypeDisabled,
     isReadOnly,
     itemToView,
   };
