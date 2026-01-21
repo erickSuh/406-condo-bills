@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import colors from '../../styles/colors';
 import fonts from '../../styles/fonts';
+import { SvgIcon } from './SvgIcon';
 
 interface FixedDialogCardProps {
   code: string;
@@ -25,11 +25,7 @@ export const FixedDialogCard: React.FC<FixedDialogCardProps> = ({
         </Text>
       </View>
       <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-        <Ionicons
-          name="trash-outline"
-          size={20}
-          color={colors.icon_light_gray}
-        />
+        <SvgIcon name="trash" size={20} color={colors.icon_light_gray} />
       </TouchableOpacity>
     </View>
   );

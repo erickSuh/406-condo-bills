@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { SvgIcon } from './SvgIcon';
 import colors from '../../styles/colors';
 import fonts from '../../styles/fonts';
 import sizes, { minActions } from '@/styles/sizes';
@@ -10,7 +10,7 @@ import spaces from '@/styles/spaces';
 interface HeaderProps {
   testID?: string;
   title: string;
-  icon?: string;
+  icon?: 'add' | 'trash' | 'chevron-back' | 'done' | 'search';
   callToAction?: () => void;
   showGoBack?: boolean;
 }
@@ -37,8 +37,8 @@ export const Header: React.FC<HeaderProps> = ({
             onPress={handleGoBack}
             testID="back-button"
           >
-            <Ionicons
-              name={'chevron-back'}
+            <SvgIcon
+              name="chevron-back"
               size={24}
               color={colors.font_inverse}
             />
@@ -52,7 +52,11 @@ export const Header: React.FC<HeaderProps> = ({
           onPress={callToAction}
           testID="header-action-button"
         >
-          <Ionicons name={icon as any} size={22} color={colors.font_inverse} />
+          <SvgIcon
+            name={icon as HeaderProps['icon']}
+            size={20}
+            color={colors.font_inverse}
+          />
         </TouchableOpacity>
       )}
     </View>
@@ -67,6 +71,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     minHeight: minActions.action.minHeight,
     minWidth: minActions.action.minWidth,
+    paddingHorizontal: spaces.small,
   },
   tileContainer: {
     flexDirection: 'row',

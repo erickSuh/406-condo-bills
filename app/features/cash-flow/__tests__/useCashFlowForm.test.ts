@@ -1,5 +1,5 @@
 import { useCashFlowFormScreen } from './../hooks/useCashFlowFormScreen';
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-native';
 
 jest.mock('@/shared/context/AlertContext', () => ({
   useAlert: () => ({

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { SvgIcon } from './SvgIcon';
 
 import colors from '../../styles/colors';
 
@@ -13,13 +13,16 @@ export const Input = ({
   style,
   icon,
   ...rest
-}: TextInputProps & { ref?: React.Ref<TextInput>; icon?: string }) => {
+}: TextInputProps & {
+  ref?: React.Ref<TextInput>;
+  icon?: 'add' | 'trash' | 'chevron-back' | 'done' | 'search';
+}) => {
   const [focused, setFocused] = useState(false);
 
   return (
     <View style={[styles.container, focused && styles.containerFocused, style]}>
       {!focused && icon && (
-        <Ionicons
+        <SvgIcon
           name={icon as any}
           size={20}
           color={colors.icon_light_gray}
@@ -70,8 +73,6 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     color: colors.font_primary,
     paddingVertical: 12,
-    minWidth: 24,
-    minHeight: 24,
     height: '100%',
   },
   inputFocused: {

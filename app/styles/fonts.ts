@@ -6,6 +6,8 @@ export default {
   label: 'Rubik_500Medium',
   listItemTitle: 'Rubik_400Medium',
   listItemCount: 'Rubik_400Medium',
+  modalDeleteTitle: 'Rubik_400Medium',
+  modalDeleteTitleBold: 'Rubik_700Bold',
   sizes: {
     base: 15,
     small: 12,

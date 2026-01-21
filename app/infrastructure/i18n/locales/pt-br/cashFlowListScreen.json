@@ -4,5 +4,6 @@
   "listHeader": "Listagem",
   "listHeaderRegistryCount_one": "{{count}} registro",
   "listHeaderRegistryCount_other": "{{count}} registros",
-  "emptyListMessage": "Nenhuma conta encontrada"
+  "emptyListMessage": "Nenhuma conta encontrada",
+  "deleteConfirmTitle": "Deseja excluir a conta"
 }
