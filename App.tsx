@@ -16,6 +16,7 @@ import { AlertProvider } from './app/shared/context/AlertContext';
 import { ErrorBoundary } from './app/shared/context/ErrorBoundary';
 import { initializeDatabase } from './app/infrastructure/database';
 import { DatabaseProvider } from '@/shared/context/DatabaseContext';
+import { useUpdateCheck } from './app/hooks/useUpdateCheck';
 import './app/infrastructure/i18n';
 
 function AppContent() {
@@ -24,6 +25,19 @@ function AppContent() {
       console.error('Failed to initialize database:', error),
     );
   }, []);
+
+  // Check for OTA updates on app launch
+  useUpdateCheck({
+    onUpdateAvailable: () => {
+      console.log('📱 Update is being downloaded in the background');
+    },
+    onUpdateFetched: () => {
+      console.log('📥 Update ready - will be applied on next app restart');
+    },
+    onError: (error) => {
+      console.error('⚠️ Update check failed:', error.message);
+    },
+  });
 
   const [robotoFontsLoaded] = useRobotoFonts({
     Roboto_400Regular,

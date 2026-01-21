@@ -20,3 +20,5 @@ coverage/
 
 android
 ios
+
+dist/
