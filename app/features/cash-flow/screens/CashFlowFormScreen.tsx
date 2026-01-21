@@ -1,7 +1,10 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
+import { useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '@/routes/types';
 import colors from '@/styles/colors';
 import fonts from '@/styles/fonts';
 import spaces from '@/styles/spaces';
@@ -10,7 +13,25 @@ import { Select } from '@/shared/components/Select';
 import { useCashFlowFormScreen } from '../hooks/useCashFlowFormScreen';
 import { CASH_FLOW_FORM_NAMESPACE } from '../constants';
 
+type CashFlowFormScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'CashFlowFormScreen'
+>;
+
 export const CashFlowFormScreen: React.FC = () => {
+  let route: CashFlowFormScreenRouteProp | undefined;
+  try {
+    const routeFromHook = useRoute<CashFlowFormScreenRouteProp>();
+    route = routeFromHook;
+  } catch {
+    // Route hook not available outside navigator context (e.g., in tests)
+  }
+
+  const [isReadOnly, setIsReadOnly] = useState(
+    route?.params?.isReadOnly ?? false,
+  );
+  const itemToView = route?.params?.item;
+
   const {
     control,
     errors,
@@ -23,7 +44,18 @@ export const CashFlowFormScreen: React.FC = () => {
     validateCode,
     parentCode,
     t,
+    setValue,
   } = useCashFlowFormScreen();
+
+  useEffect(() => {
+    if (itemToView && isReadOnly) {
+      setValue('code', itemToView.code);
+      setValue('title', itemToView.title);
+      setValue('type', String(itemToView.type));
+      setValue('parentAccountId', '1');
+      setValue('acceptsEntries', '1');
+    }
+  }, [itemToView, isReadOnly, setValue]);
 
   const parentAccountId = watch('parentAccountId');
   const isTypeDisabled = !!parentAccountId;
@@ -60,6 +92,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Selecione a conta',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
+                editable={!isReadOnly}
               />
             )}
           />
@@ -101,6 +134,7 @@ export const CashFlowFormScreen: React.FC = () => {
                     value={value || prefix}
                     onChangeText={handleCodeChange}
                     maxLength={20}
+                    editable={!isReadOnly}
                   />
                   {errors.code && (
                     <Text style={styles.error}>{errors.code.message}</Text>
@@ -134,6 +168,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   maxLength={120}
+                  editable={!isReadOnly}
                 />
                 {errors.title && (
                   <Text style={styles.error}>{errors.title.message}</Text>
@@ -159,7 +194,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Select type',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={!formData.isTypeDisabled}
+                editable={!formData.isTypeDisabled && !isReadOnly}
               />
             )}
           />
@@ -184,6 +219,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Select',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
+                editable={!isReadOnly}
               />
             )}
           />
@@ -210,11 +246,11 @@ export const CashFlowFormScreen: React.FC = () => {
       <View style={styles.header}>
         <Header
           title={t('title', {
-            defaultValue: 'Inserir Conta',
+            defaultValue: isReadOnly ? 'Visualizar Conta' : 'Inserir Conta',
             ns: CASH_FLOW_FORM_NAMESPACE,
           })}
-          icon="done"
-          callToAction={handleSubmit}
+          icon={isReadOnly ? undefined : 'done'}
+          callToAction={isReadOnly ? undefined : handleSubmit}
           showGoBack
         />
       </View>

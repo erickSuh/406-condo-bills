@@ -45,6 +45,7 @@ eas update --channel preview --branch main
 ## Testing Updates Locally
 
 1. Build the app with EAS:
+
    ```bash
    eas build --platform ios --channel preview
    ```
@@ -54,6 +55,7 @@ eas update --channel preview --branch main
 3. Make code changes
 
 4. Publish an update:
+
    ```bash
    eas update --channel preview
    ```
@@ -73,6 +75,7 @@ This will immediately restart the app with the new version.
 ## Configuration Options
 
 See [Expo Updates Configuration](https://docs.expo.dev/guides/over-the-air-updates/) for more options like:
+
 - `checkAutomatically` - Set when to check (ON_APP_START, ON_LOAD, etc.)
 - `fallbackToCacheTimeout` - How long to wait before using cached version
 - Channel-specific configurations

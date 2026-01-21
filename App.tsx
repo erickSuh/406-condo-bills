@@ -34,7 +34,7 @@ function AppContent() {
     onUpdateFetched: () => {
       console.log('📥 Update ready - will be applied on next app restart');
     },
-    onError: (error) => {
+    onError: error => {
       console.error('⚠️ Update check failed:', error.message);
     },
   });
