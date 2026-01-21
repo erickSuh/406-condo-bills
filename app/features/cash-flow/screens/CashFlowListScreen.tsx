@@ -44,6 +44,13 @@ export const CashFlowListScreen: React.FC = () => {
     setDeleteConfirmVisible(true);
   };
 
+  const handleCardPress = useCallback(
+    (item: CashFlowItem) => {
+      navigate('CashFlowFormScreen', { item, isReadOnly: true });
+    },
+    [navigate],
+  );
+
   const confirmDelete = () => {
     if (itemToDelete !== null) {
       handleDelete(itemToDelete.id);
@@ -62,12 +69,14 @@ export const CashFlowListScreen: React.FC = () => {
   };
 
   const renderItem = ({ item }: { item: CashFlowItem }) => (
-    <FixedDialogCard
-      code={item.code}
-      title={item.title}
-      codeColor={getCodeColor(item.type)}
-      onDelete={() => handleDeletePress(item)}
-    />
+    <TouchableOpacity onPress={() => handleCardPress(item)}>
+      <FixedDialogCard
+        code={item.code}
+        title={item.title}
+        codeColor={getCodeColor(item.type)}
+        onDelete={() => handleDeletePress(item)}
+      />
+    </TouchableOpacity>
   );
 
   return (
