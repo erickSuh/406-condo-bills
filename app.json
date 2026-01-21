@@ -5,10 +5,10 @@
     "slug": "406-condo-bills",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/ucondo.png",
     "scheme": "condobills",
     "splash": {
-      "image": "./assets/shopping-basket.png",
+      "image": "./assets/ucondo.png",
       "resizeMode": "contain",
       "backgroundColor": "#F0EDF5"
     },
@@ -20,18 +20,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.eks.shoppinglist"
+      "bundleIdentifier": "com.esugahara.condobills"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/shopping-basket.png",
+        "foregroundImage": "./assets/ucondo.png",
         "backgroundColor": "#F0EDF5"
       },
-      "package": "com.eks.shoppinglist"
-    },
-    "web": {
-      "bundles": "metro",
-      "favicon": "./assets/favicon.png"
+      "package": "com.esugahara.condobills"
     },
     "plugins": [
       "expo-font",
