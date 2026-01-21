@@ -2,9 +2,6 @@ import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
-import { useRoute } from '@react-navigation/native';
-import type { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '@/routes/types';
 import colors from '@/styles/colors';
 import fonts from '@/styles/fonts';
 import spaces from '@/styles/spaces';
@@ -13,25 +10,7 @@ import { Select } from '@/shared/components/Select';
 import { useCashFlowFormScreen } from '../hooks/useCashFlowFormScreen';
 import { CASH_FLOW_FORM_NAMESPACE } from '../constants';
 
-type CashFlowFormScreenRouteProp = RouteProp<
-  RootStackParamList,
-  'CashFlowFormScreen'
->;
-
 export const CashFlowFormScreen: React.FC = () => {
-  let route: CashFlowFormScreenRouteProp | undefined;
-  try {
-    const routeFromHook = useRoute<CashFlowFormScreenRouteProp>();
-    route = routeFromHook;
-  } catch {
-    // Route hook not available outside navigator context (e.g., in tests)
-  }
-
-  const [isReadOnly, setIsReadOnly] = useState(
-    route?.params?.isReadOnly ?? false,
-  );
-  const itemToView = route?.params?.item;
-
   const {
     control,
     errors,
@@ -45,6 +24,8 @@ export const CashFlowFormScreen: React.FC = () => {
     parentCode,
     t,
     setValue,
+    isReadOnly,
+    itemToView,
   } = useCashFlowFormScreen();
 
   useEffect(() => {
@@ -52,8 +33,8 @@ export const CashFlowFormScreen: React.FC = () => {
       setValue('code', itemToView.code);
       setValue('title', itemToView.title);
       setValue('type', String(itemToView.type));
-      setValue('parentAccountId', '1');
-      setValue('acceptsEntries', '1');
+      setValue('parentAccountId', String(itemToView.parent_id));
+      setValue('acceptsEntries', itemToView.accepts_entries);
     }
   }, [itemToView, isReadOnly, setValue]);
 
@@ -113,6 +94,9 @@ export const CashFlowFormScreen: React.FC = () => {
               validate: formData.validateCode,
             }}
             render={({ field: { value, onChange } }) => {
+              const newValue = value
+                .replaceAll(',', '.')
+                .replaceAll(/[^0-9.]/g, '');
               const prefix = formData.parentCode
                 ? `${formData.parentCode}.`
                 : '';
@@ -131,10 +115,11 @@ export const CashFlowFormScreen: React.FC = () => {
                       defaultValue: 'Ex: 1.1',
                       ns: CASH_FLOW_FORM_NAMESPACE,
                     })}
-                    value={value || prefix}
+                    value={newValue || prefix}
                     onChangeText={handleCodeChange}
                     maxLength={20}
                     editable={!isReadOnly}
+                    keyboardType="numeric"
                   />
                   {errors.code && (
                     <Text style={styles.error}>{errors.code.message}</Text>
@@ -234,6 +219,7 @@ export const CashFlowFormScreen: React.FC = () => {
       flowTypes,
       acceptsEntriesOptions,
       formData,
+      isReadOnly,
     ],
   );
 
@@ -245,10 +231,17 @@ export const CashFlowFormScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Header
-          title={t('title', {
-            defaultValue: isReadOnly ? 'Visualizar Conta' : 'Inserir Conta',
-            ns: CASH_FLOW_FORM_NAMESPACE,
-          })}
+          title={
+            itemToView && isReadOnly
+              ? t('titleEdit', {
+                  defaultValue: 'Visualizar Conta',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })
+              : t('title', {
+                  defaultValue: 'Inserir Conta',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })
+          }
           icon={isReadOnly ? undefined : 'done'}
           callToAction={isReadOnly ? undefined : handleSubmit}
           showGoBack

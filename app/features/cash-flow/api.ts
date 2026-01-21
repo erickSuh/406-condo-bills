@@ -39,7 +39,7 @@ export class CashFlowRepository {
     if (!this.db) return [];
     try {
       const result = await this.db.getAllAsync<CashFlowItem>(
-        'SELECT * FROM cash_flow WHERE deleted = 0 AND accepts_entries = 1 ORDER BY code',
+        'SELECT * FROM cash_flow WHERE deleted = 0 ORDER BY code',
       );
       return sortCodeNumeric(result || []);
     } catch (error) {

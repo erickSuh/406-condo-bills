@@ -37,7 +37,7 @@ describe('useCashFlowForm', () => {
       code: '',
       title: '',
       type: '0',
-      acceptsEntries: '1',
+      acceptsEntries: 1,
     });
   });
 

@@ -1,5 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '@/routes/types';
 import { useAlert } from '@/shared/context/AlertContext';
 import { CashFlowRepository } from '../api';
 import { useDatabase } from '@/shared/context/DatabaseContext';
@@ -7,7 +10,11 @@ import { CashFlowItem, FlowType } from '../types';
 import { SelectOption } from '@/shared/components';
 import { useTranslation } from 'react-i18next';
 import { CASH_FLOW_FORM_NAMESPACE } from '../constants';
-import { useNavigation } from '@react-navigation/native';
+
+type CashFlowFormScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'CashFlowFormScreen'
+>;
 
 export interface CashFlowFormData {
   parentAccountId: string | number;
@@ -61,6 +68,16 @@ const suggestNextCode = (
 };
 
 export const useCashFlowFormScreen = () => {
+  let route: CashFlowFormScreenRouteProp | undefined;
+  try {
+    const routeFromHook = useRoute<CashFlowFormScreenRouteProp>();
+    route = routeFromHook;
+  } catch {
+    // Route hook not available outside navigator context (e.g., in tests)
+  }
+
+  const [isReadOnly] = useState(route?.params?.isReadOnly ?? false);
+  const itemToView = route?.params?.item;
   const { showAlert } = useAlert();
   const { db, isReady } = useDatabase();
   const [isLoading, setIsLoading] = useState(false);
@@ -82,7 +99,7 @@ export const useCashFlowFormScreen = () => {
       code: '',
       title: '',
       type: '0',
-      acceptsEntries: '1',
+      acceptsEntries: 1,
     },
   });
 
@@ -114,7 +131,7 @@ export const useCashFlowFormScreen = () => {
   }, [isReady, refetchItems]);
 
   useEffect(() => {
-    if (!db || !parentAccountIdValue) {
+    if (!db || !parentAccountIdValue || isReadOnly) {
       return;
     }
 
@@ -145,7 +162,7 @@ export const useCashFlowFormScreen = () => {
     };
 
     suggestCode();
-  }, [db, parentAccountIdValue, parentItems, setValue]);
+  }, [db, parentAccountIdValue, parentItems, setValue, isReadOnly]);
 
   const validateCode = useCallback(
     async (code: string) => {
@@ -191,6 +208,17 @@ export const useCashFlowFormScreen = () => {
           });
         }
 
+        const invalidSegment = codeSegments.find(segment => {
+          const num = parseInt(segment, 10);
+          return isNaN(num) || num > 999;
+        });
+        if (invalidSegment) {
+          return t('errorSegmentsLimit', {
+            ns: CASH_FLOW_FORM_NAMESPACE,
+            defaultValue: 'Cada segmento do código não pode ser maior que 999',
+          });
+        }
+
         const allCashFlows = await repository.getCashFlows();
         const codeExists = allCashFlows.some(item => item.code === code);
         if (codeExists) {
@@ -206,7 +234,7 @@ export const useCashFlowFormScreen = () => {
         return true;
       }
     },
-    [db, parentAccountIdValue, parentItems],
+    [db, parentAccountIdValue, parentItems, t],
   );
 
   const onSubmit = useCallback(
@@ -218,8 +246,8 @@ export const useCashFlowFormScreen = () => {
         const repository = new CashFlowRepository(db);
 
         await repository.insertCashFlow({
-          code: data.code,
-          title: data.title,
+          code: data.code.trim(),
+          title: data.title.trim(),
           type: Number(data.type),
           parentAccountId: Number(data.parentAccountId),
           acceptsEntries: Number(data.acceptsEntries),
@@ -247,7 +275,7 @@ export const useCashFlowFormScreen = () => {
         setIsLoading(false);
       }
     },
-    [db, showAlert, reset],
+    [db, showAlert, reset, goBack],
   );
 
   const loadItems = async () => {
@@ -269,8 +297,8 @@ export const useCashFlowFormScreen = () => {
 
   const acceptsEntriesOptions: SelectOption[] = useMemo(
     () => [
-      { label: 'Sim', value: '1' },
-      { label: 'Não', value: '0' },
+      { label: 'Sim', value: 1 },
+      { label: 'Não', value: 0 },
     ],
     [],
   );
@@ -321,5 +349,7 @@ export const useCashFlowFormScreen = () => {
     watch,
     validateCode,
     parentCode,
+    isReadOnly,
+    itemToView,
   };
 };

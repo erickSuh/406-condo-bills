@@ -1,5 +1,6 @@
 {
   "title": "Inserir Conta",
+  "titleEdit": "Editar Conta",
   "parentAccount": "Conta pai",
   "selectParentAccount": "Selecione a conta pai",
   "code": "Código",
@@ -15,6 +16,7 @@
   "errorExistingCode": "Este código já existe",
   "errorCodePrefix": "O código deve começar com \"{{expectedPrefix}}\"",
   "errorCodeBeEmpty": "O código não pode estar vazio",
+  "errorSegmentsLimit": "Cada segmento do código não pode ser maior que 999",
   "deleteCancel": "Não!",
   "deleteConfirm": "Com certeza"
 }

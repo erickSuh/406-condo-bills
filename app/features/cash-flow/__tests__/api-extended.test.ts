@@ -17,11 +17,29 @@ describe('CashFlowRepository - Extended Coverage', () => {
   describe('getCashFlows - Edge Cases', () => {
     it('should filter out soft-deleted items', async () => {
       const mockCashFlows: CashFlowItem[] = [
-        { id: 1, code: '1', title: 'Active', type: 0, deleted: 0 },
-        { id: 2, code: '2', title: 'Deleted', type: 1, deleted: 1 },
+        {
+          id: 1,
+          code: '1',
+          title: 'Active',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
+        {
+          id: 2,
+          code: '2',
+          title: 'Deleted',
+          type: 1,
+          deleted: 1,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
       ];
 
-      mockDb.getAllAsync.mockResolvedValue(mockCashFlows.filter(cf => !cf.deleted));
+      mockDb.getAllAsync.mockResolvedValue(
+        mockCashFlows.filter(cf => !cf.deleted),
+      );
 
       const result = await repository.getCashFlows();
 
@@ -31,13 +49,37 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
     it('should order results by code', async () => {
       const mockCashFlows: CashFlowItem[] = [
-        { id: 1, code: '2', title: 'Second', type: 0, deleted: 0 },
-        { id: 2, code: '1', title: 'First', type: 1, deleted: 0 },
-        { id: 3, code: '3', title: 'Third', type: 0, deleted: 0 },
+        {
+          id: 1,
+          code: '2',
+          title: 'Second',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
+        {
+          id: 2,
+          code: '1',
+          title: 'First',
+          type: 1,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
+        {
+          id: 3,
+          code: '3',
+          title: 'Third',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
       ];
 
       mockDb.getAllAsync.mockResolvedValue(
-        mockCashFlows.sort((a, b) => a.code.localeCompare(b.code))
+        mockCashFlows.sort((a, b) => a.code.localeCompare(b.code)),
       );
 
       const result = await repository.getCashFlows();
@@ -49,13 +91,37 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
     it('should handle numeric and string codes', async () => {
       const mockCashFlows: CashFlowItem[] = [
-        { id: 1, code: '10', title: 'Ten', type: 0, deleted: 0 },
-        { id: 2, code: '2', title: 'Two', type: 1, deleted: 0 },
-        { id: 3, code: '1', title: 'One', type: 0, deleted: 0 },
+        {
+          id: 1,
+          code: '10',
+          title: 'Ten',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
+        {
+          id: 2,
+          code: '2',
+          title: 'Two',
+          type: 1,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
+        {
+          id: 3,
+          code: '1',
+          title: 'One',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
       ];
 
       mockDb.getAllAsync.mockResolvedValue(
-        mockCashFlows.sort((a, b) => a.code.localeCompare(b.code))
+        mockCashFlows.sort((a, b) => a.code.localeCompare(b.code)),
       );
 
       const result = await repository.getCashFlows();
@@ -64,13 +130,18 @@ describe('CashFlowRepository - Extended Coverage', () => {
     });
 
     it('should handle large result sets', async () => {
-      const mockCashFlows: CashFlowItem[] = Array.from({ length: 1000 }, (_, i) => ({
-        id: i,
-        code: String(i),
-        title: `Item ${i}`,
-        type: i % 2,
-        deleted: 0,
-      }));
+      const mockCashFlows: CashFlowItem[] = Array.from(
+        { length: 1000 },
+        (_, i) => ({
+          id: i,
+          code: String(i),
+          title: `Item ${i}`,
+          type: i % 2,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        }),
+      );
 
       mockDb.getAllAsync.mockResolvedValue(mockCashFlows);
 
@@ -119,7 +190,7 @@ describe('CashFlowRepository - Extended Coverage', () => {
       await repository.getCashFlows();
 
       expect(mockDb.getAllAsync).toHaveBeenCalledWith(
-        'SELECT * FROM cash_flow WHERE deleted = 0 ORDER BY code'
+        'SELECT * FROM cash_flow WHERE deleted = 0 ORDER BY code',
       );
     });
   });
@@ -132,7 +203,7 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         'UPDATE cash_flow SET deleted = 1 WHERE id = ?',
-        [42]
+        [42],
       );
     });
 
@@ -143,7 +214,7 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         'UPDATE cash_flow SET deleted = 1 WHERE id = ?',
-        [999]
+        [999],
       );
     });
 
@@ -152,7 +223,7 @@ describe('CashFlowRepository - Extended Coverage', () => {
       mockDb.runAsync.mockRejectedValue(error);
 
       await expect(repository.deleteCashFlow(1)).rejects.toThrow(
-        'Database connection lost'
+        'Database connection lost',
       );
     });
 
@@ -161,7 +232,7 @@ describe('CashFlowRepository - Extended Coverage', () => {
       mockDb.runAsync.mockRejectedValue(error);
 
       await expect(repository.deleteCashFlow(1)).rejects.toThrow(
-        'FOREIGN KEY constraint failed'
+        'FOREIGN KEY constraint failed',
       );
     });
 
@@ -172,7 +243,7 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         'UPDATE cash_flow SET deleted = 1 WHERE id = ?',
-        [0]
+        [0],
       );
     });
 
@@ -183,7 +254,7 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         'UPDATE cash_flow SET deleted = 1 WHERE id = ?',
-        [-1]
+        [-1],
       );
     });
 
@@ -225,7 +296,15 @@ describe('CashFlowRepository - Extended Coverage', () => {
   describe('Integration Scenarios', () => {
     it('should handle get and delete sequence', async () => {
       const mockCashFlows: CashFlowItem[] = [
-        { id: 1, code: '1', title: 'Item 1', type: 0, deleted: 0 },
+        {
+          id: 1,
+          code: '1',
+          title: 'Item 1',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
       ];
 
       mockDb.getAllAsync.mockResolvedValue(mockCashFlows);
@@ -240,7 +319,15 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
     it('should handle multiple gets', async () => {
       const mockCashFlows: CashFlowItem[] = [
-        { id: 1, code: '1', title: 'Item', type: 0, deleted: 0 },
+        {
+          id: 1,
+          code: '1',
+          title: 'Item',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
       ];
 
       mockDb.getAllAsync.mockResolvedValue(mockCashFlows);
@@ -254,7 +341,15 @@ describe('CashFlowRepository - Extended Coverage', () => {
 
     it('should maintain data consistency', async () => {
       const originalCashFlows: CashFlowItem[] = [
-        { id: 1, code: '1', title: 'Original', type: 0, deleted: 0 },
+        {
+          id: 1,
+          code: '1',
+          title: 'Original',
+          type: 0,
+          deleted: 0,
+          accepts_entries: 1,
+          parent_id: 1,
+        },
       ];
 
       mockDb.getAllAsync.mockResolvedValue(originalCashFlows);
