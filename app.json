@@ -15,7 +15,7 @@
     "updates": {
       "url": "https://u.expo.dev/c1d80069-5562-48db-a125-09f80706d554",
       "enabled": true,
-      "checkAutomatically": "ON_APP_START",
+      "checkAutomatically": "WIFI_AND_CELLULAR",
       "fallbackToCacheTimeout": 30000
     },
     "assetBundlePatterns": [
