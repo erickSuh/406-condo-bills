@@ -10,6 +10,6 @@ export { Button } from './Button';
 export { FixedDialogCard } from './FixedDialogCard';
 export { Header } from './Header';
 export { Input } from './Input';
-export { Load } from './Load';
 export { Select } from './Select';
+export { SvgIcon } from './SvgIcon';
 export type { SelectOption } from './Select';

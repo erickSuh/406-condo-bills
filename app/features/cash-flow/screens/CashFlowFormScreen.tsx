@@ -5,7 +5,7 @@ import { Controller } from 'react-hook-form';
 import colors from '@/styles/colors';
 import fonts from '@/styles/fonts';
 import spaces from '@/styles/spaces';
-import { Header, Input, Load } from '@/shared/components';
+import { Header, Input } from '@/shared/components';
 import { Select } from '@/shared/components/Select';
 import { useCashFlowFormScreen } from '../hooks/useCashFlowFormScreen';
 import { CASH_FLOW_FORM_NAMESPACE } from '../constants';
@@ -202,7 +202,7 @@ export const CashFlowFormScreen: React.FC = () => {
   );
 
   if (isLoading) {
-    return <Load />;
+    return <></>;
   }
 
   return (
@@ -213,7 +213,7 @@ export const CashFlowFormScreen: React.FC = () => {
             defaultValue: 'Inserir Conta',
             ns: CASH_FLOW_FORM_NAMESPACE,
           })}
-          icon="checkmark"
+          icon="done"
           callToAction={handleSubmit}
           showGoBack
         />
@@ -244,12 +244,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flex: 1,
-    paddingTop: 24,
+    paddingTop: spaces.xLarge,
     backgroundColor: colors.background_secondary,
-    paddingHorizontal: 24,
+    paddingHorizontal: spaces.large,
     paddingVertical: spaces.base,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: spaces.large,
+    borderTopRightRadius: spaces.large,
   },
   formSection: {
     marginBottom: spaces.small,

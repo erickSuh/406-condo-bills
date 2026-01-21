@@ -8,10 +8,15 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  SvgIcon,
+  Input,
+  FixedDialogCard,
+  Header,
+  Button,
+} from '@/shared/components';
 import colors from '@/styles/colors';
 import fonts from '@/styles/fonts';
-import { Input, FixedDialogCard, Header, Button } from '@/shared/components';
 import { useCashFlowListScreen } from '../hooks/useCashFlowListScreen';
 import { CashFlowItem } from '../types';
 import spaces from '@/styles/spaces';
@@ -24,7 +29,7 @@ export const CashFlowListScreen: React.FC = () => {
   const { filteredItems, searchQuery, setSearchQuery, handleDelete, t } =
     useCashFlowListScreen();
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<CashFlowItem | null>(null);
 
   const getCodeColor = (code: number): string => {
     return code === 0 ? colors.green : colors.orange;
@@ -34,22 +39,26 @@ export const CashFlowListScreen: React.FC = () => {
     navigate('CashFlowFormScreen');
   }, [navigate]);
 
-  const handleDeletePress = (itemId: number) => {
-    setItemToDelete(itemId);
+  const handleDeletePress = (item: CashFlowItem) => {
+    setItemToDelete(item);
     setDeleteConfirmVisible(true);
   };
 
   const confirmDelete = () => {
     if (itemToDelete !== null) {
-      handleDelete(itemToDelete);
+      handleDelete(itemToDelete.id);
       setDeleteConfirmVisible(false);
-      setItemToDelete(null);
+      setTimeout(() => {
+        setItemToDelete(null);
+      }, 300);
     }
   };
 
   const cancelDelete = () => {
     setDeleteConfirmVisible(false);
-    setItemToDelete(null);
+    setTimeout(() => {
+      setItemToDelete(null);
+    }, 300);
   };
 
   const renderItem = ({ item }: { item: CashFlowItem }) => (
@@ -57,7 +66,7 @@ export const CashFlowListScreen: React.FC = () => {
       code={item.code}
       title={item.title}
       codeColor={getCodeColor(item.type)}
-      onDelete={() => handleDeletePress(item.id)}
+      onDelete={() => handleDeletePress(item)}
     />
   );
 
@@ -84,6 +93,10 @@ export const CashFlowListScreen: React.FC = () => {
           icon={'search'}
           maxLength={120}
           style={styles.headerInput}
+          accessibilityLabel={t('searchInputPlaceholder', {
+            ns: 'cashFlowListScreen',
+            defaultValue: 'Pesquisar conta',
+          })}
         />
       </View>
 
@@ -135,14 +148,24 @@ export const CashFlowListScreen: React.FC = () => {
         >
           <View style={styles.deleteModalContainer}>
             <View style={styles.deleteIconContainer}>
-              <Ionicons name="trash" size={48} color={colors.red} />
+              <SvgIcon name="trash" size={48} color={colors.red} />
             </View>
-            <Text style={styles.deleteModalTitle}>
-              {t('deleteConfirmTitle', {
-                defaultValue: 'Deseja excluir a conta?',
-                ns: 'cashFlowListScreen',
-              })}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.deleteModalTitle}>
+                {t('deleteConfirmTitle', {
+                  accountLabel: itemToDelete
+                    ? `${itemToDelete.code} - ${itemToDelete.title}`
+                    : '',
+                  defaultValue: 'Deseja excluir a conta',
+                  ns: 'cashFlowListScreen',
+                })}
+                {'\n'}
+                <Text style={styles.deleteModalItem}>
+                  {` ${itemToDelete?.code} - ${itemToDelete?.title}`}
+                </Text>
+                ?
+              </Text>
+            </View>
             <View style={styles.deleteModalButtons}>
               <Button
                 title={t('deleteCancel', {
@@ -237,22 +260,27 @@ const styles = StyleSheet.create({
     width: '85%',
   },
   deleteIconContainer: {
-    marginBottom: spaces.base,
+    marginBottom: spaces.large,
   },
   deleteModalTitle: {
-    fontSize: 18,
-    fontFamily: fonts.heading,
+    fontSize: fonts.sizes.base,
+    lineHeight: 25,
+    fontFamily: fonts.modalDeleteTitle,
     color: colors.font_primary,
-    marginBottom: spaces.large,
+    marginBottom: 20,
     textAlign: 'center',
   },
+  deleteModalItem: {
+    fontFamily: fonts.modalDeleteTitleBold,
+  },
   deleteModalButtons: {
+    justifyContent: 'flex-start',
     flexDirection: 'row',
     gap: spaces.base,
-    width: '100%',
+    marginHorizontal: spaces.small,
   },
   deleteButton: {
-    flex: 1,
     borderRadius: borderRadius.medium,
+    paddingHorizontal: spaces.xLarge,
   },
 });

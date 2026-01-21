@@ -1,10 +1,10 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react-native';
 import { FixedDialogCard } from '../FixedDialogCard';
 
 describe('FixedDialogCard Component', () => {
   it('renders without crashing', () => {
-    const { container } = render(
+    render(
       <FixedDialogCard
         code="2"
         title="Income"
@@ -12,11 +12,11 @@ describe('FixedDialogCard Component', () => {
         onDelete={jest.fn()}
       />,
     );
-    expect(container).toBeTruthy();
+    expect(screen.getByText('2 - Income')).toBeTruthy();
   });
 
   it('renders with different colors', () => {
-    const { container } = render(
+    render(
       <FixedDialogCard
         code="2"
         title="Expense"
@@ -24,12 +24,12 @@ describe('FixedDialogCard Component', () => {
         onDelete={jest.fn()}
       />,
     );
-    expect(container).toBeTruthy();
+    expect(screen.getByText('2 - Expense')).toBeTruthy();
   });
 
   it('accepts onDelete callback', () => {
     const mockDelete = jest.fn();
-    const { container } = render(
+    render(
       <FixedDialogCard
         code="1"
         title="Test Item"
@@ -37,14 +37,14 @@ describe('FixedDialogCard Component', () => {
         onDelete={mockDelete}
       />,
     );
-    expect(container).toBeTruthy();
     expect(mockDelete).toBeDefined();
+    expect(screen.getByText('1 - Test Item')).toBeTruthy();
   });
 
   it('renders with long titles', () => {
     const longTitle =
       'This is a very long title that should be displayed correctly on the card';
-    const { container } = render(
+    render(
       <FixedDialogCard
         code="1"
         title={longTitle}
@@ -52,6 +52,49 @@ describe('FixedDialogCard Component', () => {
         onDelete={jest.fn()}
       />,
     );
-    expect(container).toBeTruthy();
+    expect(screen.getByText(`1 - ${longTitle}`)).toBeTruthy();
+  });
+
+  it('renders with empty code string', () => {
+    render(
+      <FixedDialogCard
+        code=""
+        title="Title Only"
+        codeColor="#00AA00"
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(screen.getByText('Title Only')).toBeTruthy();
+  });
+
+  it('renders with default color when codeColor is not provided', () => {
+    render(
+      <FixedDialogCard code="1" title="Default Color" onDelete={jest.fn()} />,
+    );
+    expect(screen.getByText('1 - Default Color')).toBeTruthy();
+  });
+
+  it('renders with numeric code', () => {
+    render(
+      <FixedDialogCard
+        code="999"
+        title="High Code"
+        codeColor="#0000FF"
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(screen.getByText('999 - High Code')).toBeTruthy();
+  });
+
+  it('renders with single character code', () => {
+    render(
+      <FixedDialogCard
+        code="A"
+        title="Letter Code"
+        codeColor="#00AA00"
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(screen.getByText('A - Letter Code')).toBeTruthy();
   });
 });
