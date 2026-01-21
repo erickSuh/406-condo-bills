@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import colors from '@/styles/colors';
@@ -33,49 +40,75 @@ export const Select: React.FC<SelectProps> = ({
   const displayText = selectedOption?.label || placeholder;
 
   return (
-    <View style={[styles.container, style]}>
-      <TouchableOpacity
-        onPress={() => editable && setIsOpen(true)}
-        disabled={!editable}
-        style={[
-          styles.selectButton,
-          !editable && styles.disabled,
-          isOpen && styles.focused,
-        ]}
-      >
-        <Text
-          style={[styles.selectText, !selectedOption && styles.placeholder]}
-        >
-          {displayText}
-        </Text>
-        <Ionicons
-          name="caret-down-outline"
-          size={20}
-          color={colors.icon_gray}
-          style={styles.icon}
-        />
-      </TouchableOpacity>
+    <>
+      {Platform.OS === 'ios' ? (
+        <View style={[styles.container, style]}>
+          <TouchableOpacity
+            onPress={() => editable && setIsOpen(true)}
+            disabled={!editable}
+            style={[
+              styles.selectButton,
+              !editable && styles.disabled,
+              isOpen && styles.focused,
+            ]}
+          >
+            <Text
+              style={[styles.selectText, !selectedOption && styles.placeholder]}
+            >
+              {displayText}
+            </Text>
+            <Ionicons
+              name="caret-down-outline"
+              size={20}
+              color={colors.icon_gray}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
 
-      <Modal
-        visible={isOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsOpen(false)}
-      >
-        <TouchableOpacity activeOpacity={1} style={styles.overlay}>
-          <View style={styles.pickerContainer}>
-            <View style={styles.pickerHeader}>
-              <TouchableOpacity onPress={() => setIsOpen(false)}>
-                <Text style={styles.pickerDoneButton}>Done</Text>
-              </TouchableOpacity>
-            </View>
+          <Modal
+            visible={isOpen}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsOpen(false)}
+          >
+            <TouchableOpacity activeOpacity={1} style={styles.overlay}>
+              <View style={styles.pickerContainer}>
+                <View style={styles.pickerHeader}>
+                  <TouchableOpacity onPress={() => setIsOpen(false)}>
+                    <Text style={styles.pickerDoneButton}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <Picker
+                  selectedValue={value}
+                  onValueChange={itemValue => {
+                    onValueChange(itemValue);
+                  }}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {options.map(option => (
+                    <Picker.Item
+                      key={option.value}
+                      label={option.label}
+                      value={option.value}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </TouchableOpacity>
+          </Modal>
+        </View>
+      ) : (
+        <View style={[styles.container, style]}>
+          <View style={styles.androidPickerWrapper}>
             <Picker
+              enabled={editable}
               selectedValue={value}
               onValueChange={itemValue => {
                 onValueChange(itemValue);
               }}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
+              style={styles.androidPicker}
+              itemStyle={styles.androidPickerItem}
             >
               {options.map(option => (
                 <Picker.Item
@@ -86,9 +119,9 @@ export const Select: React.FC<SelectProps> = ({
               ))}
             </Picker>
           </View>
-        </TouchableOpacity>
-      </Modal>
-    </View>
+        </View>
+      )}
+    </>
   );
 };
 
@@ -150,7 +183,23 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: colors.font_inverse,
   },
+  androidPicker: {
+    backgroundColor: colors.font_inverse,
+    color: colors.font_label,
+  },
+  androidPickerWrapper: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    color: colors.font_inverse,
+    height: 43,
+    justifyContent: 'center',
+  },
   pickerItem: {
+    fontSize: 16,
+    fontFamily: fonts.primary,
+    color: colors.font_primary,
+  },
+  androidPickerItem: {
     fontSize: 16,
     fontFamily: fonts.primary,
     color: colors.font_primary,
