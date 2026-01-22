@@ -71,7 +71,10 @@ export const CashFlowFormScreen: React.FC = () => {
             control={control}
             name="code"
             rules={{
-              required: 'Code is required',
+              required: t('errorRequiredField', {
+                defaultValue: 'Este campo é obrigatório',
+                ns: CASH_FLOW_FORM_NAMESPACE,
+              }),
               validate: validateCode,
             }}
             render={({ field: { value, onChange } }) => {

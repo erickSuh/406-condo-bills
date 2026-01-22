@@ -364,6 +364,10 @@ Centralized design tokens:
 - **commitlint** - Enforces Conventional Commits convention
 - **Sentry** - Error tracking and performance monitoring
 
+## 🎨 Presentation
+
+- <https://docs.google.com/presentation/d/1s8Tl9ccsKVFe3eKyk5qE1_8--aFLfDtFpubUDOqUp3Y/edit?usp=sharing>
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
