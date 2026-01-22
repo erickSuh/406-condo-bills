@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SvgIcon } from './SvgIcon';
 import colors from '../../styles/colors';
@@ -24,13 +24,13 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { goBack } = useNavigation();
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     try {
       goBack();
     } catch (error) {
       console.warn('[Header] Navigation error:', error);
     }
-  };
+  }, [goBack]);
 
   return (
     <View style={styles.container} testID={testID}>

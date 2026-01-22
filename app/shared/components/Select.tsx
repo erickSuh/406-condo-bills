@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -43,12 +43,27 @@ export const Select: React.FC<SelectProps> = ({
   const selectedOption = options.find(opt => opt.value === value);
   const displayText = selectedOption?.label || placeholder;
 
+  const handleIOSOpen = () => {
+    if (!editable) return;
+    setIsOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    if (!editable) return;
+    setIsOpen(false);
+  };
+
+  const handleValueChange = (itemValue: string | number) => {
+    if (!editable) return;
+    onValueChange(itemValue);
+  };
+
   return (
     <>
       {Platform.OS === 'ios' ? (
         <View style={[styles.container, style]}>
           <TouchableOpacity
-            onPress={() => editable && setIsOpen(true)}
+            onPress={handleIOSOpen}
             disabled={!editable}
             style={[
               styles.selectButton,
@@ -75,20 +90,18 @@ export const Select: React.FC<SelectProps> = ({
             visible={isOpen}
             transparent
             animationType="fade"
-            onRequestClose={() => setIsOpen(false)}
+            onRequestClose={handleCloseModal}
           >
             <TouchableOpacity activeOpacity={1} style={styles.overlay}>
               <View style={styles.pickerContainer}>
                 <View style={styles.pickerHeader}>
-                  <TouchableOpacity onPress={() => setIsOpen(false)}>
+                  <TouchableOpacity onPress={handleCloseModal}>
                     <Text style={styles.pickerDoneButton}>Ok</Text>
                   </TouchableOpacity>
                 </View>
                 <Picker
                   selectedValue={value}
-                  onValueChange={itemValue => {
-                    onValueChange(itemValue);
-                  }}
+                  onValueChange={handleValueChange}
                   style={styles.picker}
                   itemStyle={styles.pickerItem}
                 >
@@ -131,9 +144,7 @@ export const Select: React.FC<SelectProps> = ({
             <Picker
               enabled={editable}
               selectedValue={value}
-              onValueChange={itemValue => {
-                onValueChange(itemValue);
-              }}
+              onValueChange={handleValueChange}
               style={styles.invisiblePicker}
             >
               {options?.map(option => (
