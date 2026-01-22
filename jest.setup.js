@@ -65,6 +65,20 @@ jest.mock('@react-navigation/native-stack', () => ({
 // Mock i18n initialization
 jest.mock('./app/infrastructure/i18n', () => ({}));
 
+// Mock Sentry for testing
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  wrap: component => component,
+  setUser: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  addBreadcrumb: jest.fn(),
+  startTransaction: jest.fn(),
+  mobileReplayIntegration: jest.fn(() => ({})),
+  feedbackIntegration: jest.fn(() => ({})),
+  ReactNativeTracing: jest.fn(() => ({})),
+}));
+
 // Mock react-i18next for translations - CRITICAL for text rendering
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({

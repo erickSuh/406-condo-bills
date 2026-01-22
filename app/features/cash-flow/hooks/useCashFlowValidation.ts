@@ -7,30 +7,19 @@ import {
   CASH_FLOW_FORM_NAMESPACE,
 } from '../constants';
 import { useTranslation } from 'react-i18next';
+import { useSentry } from '@/shared/hooks/useSentry';
 
 export const useCashFlowValidation = () => {
   const { db } = useDatabase();
   const { t } = useTranslation([CASH_FLOW_FORM_NAMESPACE, 'common']);
+  const { reportError } = useSentry();
 
   const validateCode = useCallback(
-    async (
-      code: string,
-      parentAccountId: string,
-      parentItems: CashFlowItem[],
-      suggestedCode?: string,
-    ): Promise<string | true> => {
+    async (code: string, suggestedCode?: string): Promise<string | true> => {
       if (!code.trim()) {
         return t('errorCodeBeEmpty', {
           ns: CASH_FLOW_FORM_NAMESPACE,
           defaultValue: 'Código não pode estar vazio',
-        });
-      }
-
-      if (!CODE_PATTERN_MAX_DEPTH_6.test(code)) {
-        return t('errorCodeFormat', {
-          ns: CASH_FLOW_FORM_NAMESPACE,
-          defaultValue:
-            'O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)',
         });
       }
 
@@ -62,6 +51,14 @@ export const useCashFlowValidation = () => {
         }
       }
 
+      if (!CODE_PATTERN_MAX_DEPTH_6.test(code)) {
+        return t('errorCodeFormat', {
+          ns: CASH_FLOW_FORM_NAMESPACE,
+          defaultValue:
+            'O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)',
+        });
+      }
+
       if (!db) {
         return t('errorDatabaseNotAvailable', {
           ns: CASH_FLOW_FORM_NAMESPACE,
@@ -80,6 +77,8 @@ export const useCashFlowValidation = () => {
           });
         }
       } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        reportError(err, { hook: 'useCashFlowValidation', code });
         console.error('Failed to validate code:', error);
         return t('errorValidationFailed', {
           ns: CASH_FLOW_FORM_NAMESPACE,
@@ -89,7 +88,7 @@ export const useCashFlowValidation = () => {
 
       return true;
     },
-    [db, t],
+    [db, t, reportError],
   );
 
   const validateTitle = useCallback(

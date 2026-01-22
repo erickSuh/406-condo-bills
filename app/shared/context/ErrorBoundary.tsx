@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useAlert } from './AlertContext';
+import * as Sentry from '@sentry/react-native';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -31,6 +32,12 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    Sentry.captureException(error, {
+      extra: {
+        componentStack: errorInfo.componentStack,
+      },
+    });
+
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.error('ErrorBoundary caught:', error, errorInfo);
     } else if (typeof __DEV__ === 'undefined') {

@@ -13,15 +13,24 @@ export const Input = ({
   style,
   icon,
   value,
+  editable = true,
   ...rest
 }: TextInputProps & {
   ref?: React.Ref<TextInput>;
   icon?: 'add' | 'trash' | 'chevron-back' | 'done' | 'search';
 }) => {
   const [focused, setFocused] = useState(false);
+  const isDisabled = !editable;
 
   return (
-    <View style={[styles.container, focused && styles.containerFocused, style]}>
+    <View
+      style={[
+        styles.container,
+        isDisabled && styles.disabled,
+        focused && styles.containerFocused,
+        style,
+      ]}
+    >
       {!focused && icon && !value?.length && (
         <SvgIcon
           name={icon as any}
@@ -49,6 +58,7 @@ export const Input = ({
         placeholder={focused ? '' : placeholder}
         placeholderTextColor={colors.font_caption}
         value={value}
+        editable={!isDisabled}
         {...rest}
       />
     </View>
@@ -66,6 +76,9 @@ const styles = StyleSheet.create({
   },
   containerFocused: {
     borderColor: colors.blue,
+  },
+  disabled: {
+    opacity: 0.5,
   },
   icon: {
     marginRight: 8,

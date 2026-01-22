@@ -5,12 +5,14 @@ import { useDatabase } from '@/shared/context/DatabaseContext';
 import { useAlert } from '@/shared/context/AlertContext';
 import { CreateCashFlowInput } from '../types';
 import { useTranslation } from 'react-i18next';
+import { useSentry } from '@/shared/hooks/useSentry';
 
 type CashFlowNavigation = NavigationProp<any>;
 
 export const useCashFlowSubmit = (navigation: CashFlowNavigation) => {
   const { db } = useDatabase();
   const { showAlert } = useAlert();
+  const { reportError } = useSentry();
   const { t } = useTranslation('messages');
 
   const submitCashFlow = useCallback(
@@ -39,6 +41,12 @@ export const useCashFlowSubmit = (navigation: CashFlowNavigation) => {
         await refetchItems();
         navigation.goBack();
       } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        reportError(err, {
+          hook: 'useCashFlowSubmit',
+          code: data.code,
+          title: data.title,
+        });
         console.error('Failed to create cash flow:', error);
         const message =
           error instanceof Error ? error.message : 'Failed to create account';
@@ -49,7 +57,7 @@ export const useCashFlowSubmit = (navigation: CashFlowNavigation) => {
         });
       }
     },
-    [db, showAlert, navigation, t],
+    [db, showAlert, navigation, t, reportError],
   );
 
   return { submitCashFlow };

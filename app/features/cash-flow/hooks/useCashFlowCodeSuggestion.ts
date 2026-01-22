@@ -3,9 +3,11 @@ import { CashFlowRepository } from '../api';
 import { useDatabase } from '@/shared/context/DatabaseContext';
 import { CashFlowItem } from '../types';
 import { suggestNextCode } from '../utils/suggestNextCode';
+import { useSentry } from '@/shared/hooks/useSentry';
 
 export const useCashFlowCodeSuggestion = () => {
   const { db } = useDatabase();
+  const { reportError } = useSentry();
 
   const suggestCode = useCallback(
     async (
@@ -48,11 +50,16 @@ export const useCashFlowCodeSuggestion = () => {
 
         return { code: suggested, prefix };
       } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        reportError(err, {
+          hook: 'useCashFlowCodeSuggestion',
+          parentCode: parentItem?.code,
+        });
         console.error('Failed to suggest code:', error);
         return { code: '', prefix: '' };
       }
     },
-    [db],
+    [db, reportError],
   );
 
   return { suggestCode };

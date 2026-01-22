@@ -8,6 +8,7 @@ A modern React Native application for managing financial flows and accounting co
 - ✅ **SQLite Database** - Local data persistence with migration system
 - ✅ **Multi-language Support** - Portuguese language support with i18n
 - ✅ **OTA Updates** - Over-the-air updates using Expo Updates
+- ✅ **Error Tracking** - Sentry integration for error monitoring and analytics
 - ✅ **Custom UI Components** - Design system with consistent styling
 - ✅ **Comprehensive Validation** - Code format, depth, and uniqueness validation
 - ✅ **Error Handling** - Custom error boundaries and alert dialogs
@@ -59,11 +60,29 @@ yarn install
 # or
 npm install
 
+# Setup environment variables
+cp .env.example .env.local
+# Then edit .env.local and add your Sentry DSN from https://sentry.io/
+
 # Start development server
 yarn start
 # or
 npm start
 ```
+
+### Environment Variables
+
+Create `.env.local` file with:
+
+```env
+# Sentry Configuration (get DSN from https://sentry.io/)
+EXPO_PUBLIC_SENTRY_DSN=https://your-key@your-org.ingest.sentry.io/project-id
+
+# App Version (optional)
+EXPO_PUBLIC_APP_VERSION=1.0.0
+```
+
+See `.env.example` for all available options.
 
 ### Running Tests
 
@@ -96,6 +115,25 @@ eas build --platform android
 - SQLite with Expo SQLite
 - Automatic migration system on app launch
 - Schema versioning and rollback support
+
+### Error Tracking & Analytics (Sentry)
+
+- **Automatic Error Capture**: ErrorBoundary catches all React errors
+- **Performance Monitoring**: Track slow transactions and performance issues
+- **Session Replay**: Replay sessions with errors for debugging
+- **User Context**: Track which user experienced errors
+- **Custom Events**: Use `useSentry` hook to track custom events
+
+```typescript
+// Using Sentry in components
+const { trackEvent, reportError } = useSentry();
+
+// Track user action
+trackEvent('Form submitted', 'form', 'info', { formId: 'cash-flow-form' });
+
+// Report error manually
+reportError(error, { context: 'payment-processing' });
+```
 
 ### Validation
 
@@ -134,6 +172,7 @@ Custom hooks for separation of concerns:
 
 Centralized design tokens:
 mponents, and screens
+
 - Integration tests for database and API
 - Component snapshot tests
 

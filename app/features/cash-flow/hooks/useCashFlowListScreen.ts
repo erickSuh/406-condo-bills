@@ -8,6 +8,7 @@ import { CASH_FLOW_LIST_NAMESPACE } from '../constants';
 import { useCashFlowListSearch } from './useCashFlowListSearch';
 import { useCashFlowListDelete } from './useCashFlowListDelete';
 import { useCashFlowListNavigation } from './useCashFlowListNavigation';
+import { useSentry } from '@/shared/hooks/useSentry';
 
 export const useCashFlowListScreen = () => {
   const { db, isReady } = useDatabase();
@@ -16,6 +17,7 @@ export const useCashFlowListScreen = () => {
   const [error, setError] = useState<Error | null>(null);
   const { t } = useTranslation(CASH_FLOW_LIST_NAMESPACE);
   const itemsLoadedRef = useRef(false);
+  const { trackEvent } = useSentry();
 
   const { searchQuery, setSearchQuery, filteredItems } =
     useCashFlowListSearch(items);
@@ -51,6 +53,10 @@ export const useCashFlowListScreen = () => {
       setIsLoading(false);
     }
   }, [db]);
+
+  useEffect(() => {
+    trackEvent('CashFlowListScreen viewed', 'screen-view', 'info');
+  }, [trackEvent]);
 
   useEffect(() => {
     if (!isReady || !db || itemsLoadedRef.current) return;
