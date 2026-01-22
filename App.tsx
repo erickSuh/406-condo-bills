@@ -20,7 +20,8 @@ import { useUpdateCheck } from './app/shared/hooks/useUpdateCheck';
 import './app/infrastructure/i18n';
 import * as Sentry from '@sentry/react-native';
 
-Sentry.init({
+try {
+  Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
 
   // Adds more context data to events (IP address, cookies, user, etc.)
@@ -37,7 +38,10 @@ Sentry.init({
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
-});
+  });
+} catch (sentryError) {
+  console.warn('[App] Sentry initialization error:', sentryError);
+}
 
 function AppContent() {
   useEffect(() => {

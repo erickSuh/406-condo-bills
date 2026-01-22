@@ -45,12 +45,12 @@ export const CashFlowFormScreen: React.FC = () => {
               <Select
                 options={parentItems}
                 value={value}
-                onValueChange={onChange}
+                onValueChange={isReadOnly ? () => {} : onChange}
                 placeholder={t('selectParentAccount', {
                   defaultValue: 'Selecione a conta pai',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={!isReadOnly}
+                editable={true}
                 accessibilityHint={t('selectParentAccount', {
                   defaultValue: 'Selecione a conta pai',
                   ns: CASH_FLOW_FORM_NAMESPACE,
@@ -101,7 +101,7 @@ export const CashFlowFormScreen: React.FC = () => {
                     value={newValue || suggestedPrefix}
                     onChangeText={handleCodeChange}
                     maxLength={23}
-                    editable={!isReadOnly}
+                    editable={true}
                     keyboardType="numeric"
                     accessibilityLabelledBy={'code-label'}
                     accessibilityLabel={t('code', {
@@ -142,7 +142,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   maxLength={120}
-                  editable={!isReadOnly}
+                  editable={true}
                   accessibilityLabelledBy={'name-label'}
                   accessibilityHint={t('namePlaceholder', {
                     defaultValue: 'Nome da conta',
@@ -168,12 +168,14 @@ export const CashFlowFormScreen: React.FC = () => {
               <Select
                 options={flowTypes}
                 value={value}
-                onValueChange={onChange}
+                onValueChange={
+                  isTypeDisabled || isReadOnly ? () => {} : onChange
+                }
                 placeholder={t('selectType', {
                   defaultValue: 'Select type',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={!isTypeDisabled && !isReadOnly}
+                editable={true}
               />
             )}
           />
@@ -193,12 +195,12 @@ export const CashFlowFormScreen: React.FC = () => {
               <Select
                 options={acceptsEntriesOptions}
                 value={value}
-                onValueChange={onChange}
+                onValueChange={isReadOnly ? () => {} : onChange}
                 placeholder={t('selectAcceptsEntries', {
                   defaultValue: 'Select',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={!isReadOnly}
+                editable={true}
                 accessibilityHint={t('selectAcceptsEntries', {
                   defaultValue: 'Select',
                   ns: CASH_FLOW_FORM_NAMESPACE,
