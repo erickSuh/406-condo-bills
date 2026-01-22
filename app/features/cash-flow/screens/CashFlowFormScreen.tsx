@@ -50,7 +50,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Selecione a conta pai',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={true}
+                editable={!isReadOnly}
                 accessibilityHint={t('selectParentAccount', {
                   defaultValue: 'Selecione a conta pai',
                   ns: CASH_FLOW_FORM_NAMESPACE,
@@ -99,9 +99,9 @@ export const CashFlowFormScreen: React.FC = () => {
                       ns: CASH_FLOW_FORM_NAMESPACE,
                     })}
                     value={newValue || suggestedPrefix}
-                    onChangeText={handleCodeChange}
+                    onChangeText={!isReadOnly ? handleCodeChange : undefined}
                     maxLength={23}
-                    editable={true}
+                    editable={!isReadOnly}
                     keyboardType="numeric"
                     accessibilityLabelledBy={'code-label'}
                     accessibilityLabel={t('code', {
@@ -142,7 +142,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   maxLength={120}
-                  editable={true}
+                  editable={!isReadOnly}
                   accessibilityLabelledBy={'name-label'}
                   accessibilityHint={t('namePlaceholder', {
                     defaultValue: 'Nome da conta',
