@@ -47,7 +47,8 @@ export const useCashFlowFormScreen = () => {
     refetchItems,
   } = useCashFlowData();
   const { suggestCode } = useCashFlowCodeSuggestion();
-  const { validateCode: validateCodeHook } = useCashFlowValidation();
+  const { validateCode: validateCodeHook, validateTitle: validateTitleHook } =
+    useCashFlowValidation();
   const { submitCashFlow } = useCashFlowSubmit(navigation);
 
   const [suggestedPrefix, setSuggestedPrefix] = useState<string>('');
@@ -121,7 +122,7 @@ export const useCashFlowFormScreen = () => {
         code,
         String(parentAccountIdValue),
         fetchedParentItems,
-        suggestedPrefix ? suggestedPrefix.slice(0, -1) : undefined, // Remove trailing dot from prefix to get suggested code
+        suggestedPrefix ? suggestedPrefix.slice(0, -1) : undefined,
       );
       return error;
     },
@@ -203,6 +204,7 @@ export const useCashFlowFormScreen = () => {
     t,
     watch,
     validateCode,
+    validateTitle: validateTitleHook,
     suggestedPrefix,
     isTypeDisabled,
     isReadOnly,
