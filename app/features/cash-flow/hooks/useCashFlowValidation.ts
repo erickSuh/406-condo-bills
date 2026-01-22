@@ -26,14 +26,6 @@ export const useCashFlowValidation = () => {
         });
       }
 
-      if (!CODE_PATTERN_MAX_DEPTH_6.test(code)) {
-        return t('errorCodeFormat', {
-          ns: CASH_FLOW_FORM_NAMESPACE,
-          defaultValue:
-            'O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)',
-        });
-      }
-
       const segments = code.split('.');
       for (const segment of segments) {
         if (parseInt(segment, 10) > 999) {
@@ -60,6 +52,14 @@ export const useCashFlowValidation = () => {
             defaultValue: `O código deve ter no máximo ${maxAllowedDepth} segmentos`,
           });
         }
+      }
+
+      if (!CODE_PATTERN_MAX_DEPTH_6.test(code)) {
+        return t('errorCodeFormat', {
+          ns: CASH_FLOW_FORM_NAMESPACE,
+          defaultValue:
+            'O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)',
+        });
       }
 
       if (!db) {
