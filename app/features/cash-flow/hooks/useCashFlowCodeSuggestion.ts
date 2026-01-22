@@ -9,7 +9,7 @@ export const useCashFlowCodeSuggestion = () => {
 
   const suggestCode = useCallback(
     async (
-      parentItem: CashFlowItem,
+      parentItem?: CashFlowItem,
     ): Promise<{ code: string; prefix: string }> => {
       if (!db) {
         return { code: '', prefix: '' };
@@ -18,6 +18,20 @@ export const useCashFlowCodeSuggestion = () => {
       try {
         const repository = new CashFlowRepository(db);
         const allCashFlows = await repository.getCashFlowChildren();
+
+        if (!parentItem) {
+          const firstLevelCodes = allCashFlows
+            .filter(item => !item.code.includes('.'))
+            .map(item => item.code);
+
+          return {
+            code: String(
+              Math.max(...firstLevelCodes.map(code => Number(code))) + 1,
+            ),
+            prefix: '',
+          };
+        }
+
         const childrenCodes = allCashFlows
           .filter(item => item.code.startsWith(parentItem.code + '.'))
           .map(item => item.code);

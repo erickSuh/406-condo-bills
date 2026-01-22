@@ -40,7 +40,6 @@ export const useCashFlowFormScreen = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const { isReady } = useDatabase();
 
-  // Use specialized hooks
   const {
     parentItems: fetchedParentItems,
     flowTypes,
@@ -66,7 +65,7 @@ export const useCashFlowFormScreen = () => {
       code: '',
       title: '',
       type: '0',
-      acceptsEntries: 1,
+      acceptsEntries: 0,
     },
   });
 
@@ -82,23 +81,25 @@ export const useCashFlowFormScreen = () => {
   }, [isReady, refetchItems]);
 
   useEffect(() => {
-    if (!parentAccountIdValue || isReadOnly) {
+    if (isReadOnly) {
       return;
     }
 
     const handleCodeSuggestion = async () => {
       try {
-        const parentItem = fetchedParentItems.find(
-          item => item.id === Number(parentAccountIdValue),
-        );
-
-        if (!parentItem) return;
+        const parentItem = parentAccountIdValue
+          ? fetchedParentItems.find(
+              item => item.id === Number(parentAccountIdValue),
+            )
+          : undefined;
 
         const { code, prefix } = await suggestCode(parentItem);
         if (code) {
           setValue('code', code);
           setSuggestedPrefix(prefix);
-          setValue('type', String(parentItem.type));
+          if (parentItem) {
+            setValue('type', String(parentItem.type));
+          }
         }
       } catch (error) {
         console.error('Failed to suggest code:', error);
@@ -116,54 +117,20 @@ export const useCashFlowFormScreen = () => {
 
   const validateCode = useCallback(
     async (code: string) => {
-      if (!code.trim()) {
-        return t('errorCodeBeEmpty', {
-          ns: CASH_FLOW_FORM_NAMESPACE,
-          defaultValue: 'Código não pode estar vazio',
-        });
-      }
-
-      const codeFormatRegex = /^\d{1,3}(\.\d{1,3})*$/;
-      if (!codeFormatRegex.test(code)) {
-        return t('errorCodeFormat', {
-          ns: CASH_FLOW_FORM_NAMESPACE,
-          defaultValue:
-            'O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)',
-        });
-      }
-
-      try {
-        const parentItem = fetchedParentItems.find(
-          item => item.id === Number(parentAccountIdValue),
-        );
-
-        if (parentItem) {
-          const expectedPrefix = parentItem.code + '.';
-          const parentSegments = parentItem.code.split('.');
-          const codeSegments = code.split('.');
-          const expectedDepth = parentSegments.length + 1;
-          if (codeSegments.length !== expectedDepth) {
-            return t('errorInvalidCodeFormat', {
-              ns: CASH_FLOW_FORM_NAMESPACE,
-              defaultValue: `O código deve ter exatamente ${expectedDepth} segmentos (ex: "${expectedPrefix}1")`,
-              expectedDepth,
-              expectedPrefix,
-            });
-          }
-        }
-
-        const error = await validateCodeHook(
-          code,
-          String(parentAccountIdValue),
-          fetchedParentItems,
-        );
-        return error || true;
-      } catch (error) {
-        console.error('Code validation error:', error);
-        return true;
-      }
+      const error = await validateCodeHook(
+        code,
+        String(parentAccountIdValue),
+        fetchedParentItems,
+        suggestedPrefix ? suggestedPrefix.slice(0, -1) : undefined, // Remove trailing dot from prefix to get suggested code
+      );
+      return error;
     },
-    [fetchedParentItems, parentAccountIdValue, validateCodeHook, t],
+    [
+      fetchedParentItems,
+      parentAccountIdValue,
+      validateCodeHook,
+      suggestedPrefix,
+    ],
   );
 
   const onSubmit = useCallback(

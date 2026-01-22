@@ -24,6 +24,8 @@ interface SelectProps {
   onValueChange: (value: string | number) => void;
   style?: any;
   editable?: boolean;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -33,6 +35,8 @@ export const Select: React.FC<SelectProps> = ({
   onValueChange,
   style,
   editable = true,
+  accessibilityLabel,
+  accessibilityHint,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,6 +55,8 @@ export const Select: React.FC<SelectProps> = ({
               !editable && styles.disabled,
               isOpen && styles.focused,
             ]}
+            accessibilityLabel={accessibilityLabel}
+            accessibilityHint={accessibilityHint}
           >
             <Text
               style={[styles.selectText, !selectedOption && styles.placeholder]}
@@ -75,7 +81,7 @@ export const Select: React.FC<SelectProps> = ({
               <View style={styles.pickerContainer}>
                 <View style={styles.pickerHeader}>
                   <TouchableOpacity onPress={() => setIsOpen(false)}>
-                    <Text style={styles.pickerDoneButton}>Done</Text>
+                    <Text style={styles.pickerDoneButton}>Ok</Text>
                   </TouchableOpacity>
                 </View>
                 <Picker
@@ -104,6 +110,8 @@ export const Select: React.FC<SelectProps> = ({
             disabled={!editable}
             activeOpacity={0.7}
             style={[styles.selectButton, !editable && styles.disabled]}
+            accessibilityLabel={accessibilityLabel}
+            accessibilityHint={accessibilityHint}
           >
             <Text
               style={[styles.selectText, !selectedOption && styles.placeholder]}
@@ -113,7 +121,7 @@ export const Select: React.FC<SelectProps> = ({
             </Text>
             <Ionicons
               name="caret-down-outline"
-              size={20}
+              size={23}
               color={colors.icon_gray}
               style={styles.icon}
             />

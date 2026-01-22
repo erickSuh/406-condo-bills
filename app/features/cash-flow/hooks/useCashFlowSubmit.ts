@@ -4,12 +4,14 @@ import { CashFlowRepository } from '../api';
 import { useDatabase } from '@/shared/context/DatabaseContext';
 import { useAlert } from '@/shared/context/AlertContext';
 import { CreateCashFlowInput } from '../types';
+import { useTranslation } from 'react-i18next';
 
 type CashFlowNavigation = NavigationProp<any>;
 
 export const useCashFlowSubmit = (navigation: CashFlowNavigation) => {
   const { db } = useDatabase();
   const { showAlert } = useAlert();
+  const { t } = useTranslation('messages');
 
   const submitCashFlow = useCallback(
     async (data: CreateCashFlowInput, refetchItems: () => Promise<void>) => {
@@ -27,8 +29,11 @@ export const useCashFlowSubmit = (navigation: CashFlowNavigation) => {
         await repository.insertCashFlow(data);
 
         showAlert({
-          title: 'Success',
-          message: 'Account created successfully',
+          title: t('success', { ns: 'messages', defaultValue: 'Sucesso' }),
+          message: t('itemCreated', {
+            ns: 'messages',
+            defaultValue: 'Item criado com sucesso',
+          }),
           type: 'success',
         });
         await refetchItems();
@@ -44,7 +49,7 @@ export const useCashFlowSubmit = (navigation: CashFlowNavigation) => {
         });
       }
     },
-    [db, showAlert, navigation],
+    [db, showAlert, navigation, t],
   );
 
   return { submitCashFlow };

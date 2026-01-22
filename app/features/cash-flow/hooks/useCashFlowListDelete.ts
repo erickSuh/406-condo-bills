@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { CashFlowRepository } from '../api';
 import { useDatabase } from '@/shared/context/DatabaseContext';
 import { CashFlowItem } from '../types';
+import { useTranslation } from 'react-i18next';
+import { useAlert } from '@/shared/context/AlertContext';
 
 export const useCashFlowListDelete = (
   onDeleteSuccess: (deletedIds: number[]) => void,
@@ -11,6 +13,8 @@ export const useCashFlowListDelete = (
   const [itemToDelete, setItemToDelete] = useState<CashFlowItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<Error | null>(null);
+  const { showAlert } = useAlert();
+  const { t } = useTranslation('messages');
 
   const handleDeletePress = useCallback((item: CashFlowItem) => {
     setItemToDelete(item);
@@ -28,6 +32,14 @@ export const useCashFlowListDelete = (
 
         await repository.deleteCashFlow(id);
         onDeleteSuccess(idsToRemove);
+        showAlert({
+          title: t('success', { ns: 'messages', defaultValue: 'Sucesso' }),
+          message: t('itemDeleted', {
+            ns: 'messages',
+            defaultValue: 'Item deletado com sucesso',
+          }),
+          type: 'success',
+        });
         setDeleteError(null);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
@@ -37,7 +49,7 @@ export const useCashFlowListDelete = (
         setIsDeleting(false);
       }
     },
-    [db, onDeleteSuccess],
+    [db, onDeleteSuccess, t, showAlert],
   );
 
   const confirmDelete = useCallback(() => {

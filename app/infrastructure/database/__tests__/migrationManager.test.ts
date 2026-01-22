@@ -1,4 +1,3 @@
-import { initDatabase } from '../db';
 import { runMigrations } from '../migrationManager';
 
 // Mock the database module

@@ -46,17 +46,21 @@ export const CashFlowFormScreen: React.FC = () => {
                 value={value}
                 onValueChange={onChange}
                 placeholder={t('selectParentAccount', {
-                  defaultValue: 'Selecione a conta',
+                  defaultValue: 'Selecione a conta pai',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
                 editable={!isReadOnly}
+                accessibilityHint={t('selectParentAccount', {
+                  defaultValue: 'Selecione a conta pai',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })}
               />
             )}
           />
         </View>
 
         <View style={styles.formSection}>
-          <Text style={styles.label}>
+          <Text style={styles.label} nativeID="code-label">
             {t('code', {
               defaultValue: 'Código',
               ns: CASH_FLOW_FORM_NAMESPACE,
@@ -98,6 +102,11 @@ export const CashFlowFormScreen: React.FC = () => {
                     maxLength={20}
                     editable={!isReadOnly}
                     keyboardType="numeric"
+                    accessibilityLabelledBy={'code-label'}
+                    accessibilityLabel={t('code', {
+                      defaultValue: 'Código',
+                      ns: CASH_FLOW_FORM_NAMESPACE,
+                    })}
                   />
                   {errors.code && (
                     <Text style={styles.error}>{errors.code.message}</Text>
@@ -109,7 +118,7 @@ export const CashFlowFormScreen: React.FC = () => {
         </View>
 
         <View style={styles.formSection}>
-          <Text style={styles.label}>
+          <Text style={styles.label} nativeID="name-label">
             {t('name', { defaultValue: 'Nome', ns: CASH_FLOW_FORM_NAMESPACE })}
           </Text>
           <Controller
@@ -132,6 +141,11 @@ export const CashFlowFormScreen: React.FC = () => {
                   onChangeText={onChange}
                   maxLength={120}
                   editable={!isReadOnly}
+                  accessibilityLabelledBy={'name-label'}
+                  accessibilityHint={t('namePlaceholder', {
+                    defaultValue: 'Nome da conta',
+                    ns: CASH_FLOW_FORM_NAMESPACE,
+                  })}
                 />
                 {errors.title && (
                   <Text style={styles.error}>{errors.title.message}</Text>
@@ -183,6 +197,10 @@ export const CashFlowFormScreen: React.FC = () => {
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
                 editable={!isReadOnly}
+                accessibilityHint={t('selectAcceptsEntries', {
+                  defaultValue: 'Select',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })}
               />
             )}
           />

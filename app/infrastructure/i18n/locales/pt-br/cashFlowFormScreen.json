@@ -12,12 +12,14 @@
   "acceptsEntries": "Aceita lançamentos",
   "selectAcceptsEntries": "Selecione",
   "errorRequiredField": "Este campo é obrigatório",
-  "errorInvalidCodeFormat": "O código deve ter exatamente {{expectedDepth}} segmentos (ex: \"{{expectedPrefix}}1\")",
   "errorExistingCode": "Este código já existe",
-  "errorCodePrefix": "O código deve começar com \"{{expectedPrefix}}\"",
   "errorCodeBeEmpty": "O código não pode estar vazio",
   "errorSegmentsLimit": "Cada segmento do código não pode ser maior que 999",
   "errorCodeFormat": "O código deve estar no formato válido (ex: 1, 123, 1.2, 1.23.456)",
+  "errorDatabaseNotAvailable": "Banco de dados não disponível",
+  "errorParentCodeNotExists": "Código da conta pai não existe",
+  "errorCodeDepthExceeded": "O código deve ter no máximo {{expectedDepth}} segmentos",
+  "errorValidationFailed": "Falha ao validar código",
   "deleteCancel": "Não!",
   "deleteConfirm": "Com certeza"
 }
