@@ -11,3 +11,11 @@ export interface FlowType {
   id: number;
   label: string;
 }
+
+export interface CreateCashFlowInput {
+  code: string;
+  title: string;
+  type: number;
+  parentAccountId?: number;
+  acceptsEntries?: number;
+}

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -20,53 +20,23 @@ import fonts from '@/styles/fonts';
 import { useCashFlowListScreen } from '../hooks/useCashFlowListScreen';
 import { CashFlowItem } from '../types';
 import spaces from '@/styles/spaces';
-import { useNavigation } from '@react-navigation/native';
-import { RootStackNavigationProp } from '@/routes/types';
 import { borderRadius } from '@/styles/borderRadius';
+import { getCodeColor } from '../utils/getCodeColor';
 
 export const CashFlowListScreen: React.FC = () => {
-  const { navigate } = useNavigation<RootStackNavigationProp>();
-  const { filteredItems, searchQuery, setSearchQuery, handleDelete, t } =
-    useCashFlowListScreen();
-  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<CashFlowItem | null>(null);
-
-  const getCodeColor = (code: number): string => {
-    return code === 0 ? colors.green : colors.orange;
-  };
-
-  const handleNavigateToForm = useCallback(() => {
-    navigate('CashFlowFormScreen');
-  }, [navigate]);
-
-  const handleDeletePress = (item: CashFlowItem) => {
-    setItemToDelete(item);
-    setDeleteConfirmVisible(true);
-  };
-
-  const handleCardPress = useCallback(
-    (item: CashFlowItem) => {
-      navigate('CashFlowFormScreen', { item, isReadOnly: true });
-    },
-    [navigate],
-  );
-
-  const confirmDelete = () => {
-    if (itemToDelete !== null) {
-      handleDelete(itemToDelete.id);
-      setDeleteConfirmVisible(false);
-      setTimeout(() => {
-        setItemToDelete(null);
-      }, 300);
-    }
-  };
-
-  const cancelDelete = () => {
-    setDeleteConfirmVisible(false);
-    setTimeout(() => {
-      setItemToDelete(null);
-    }, 300);
-  };
+  const {
+    filteredItems,
+    searchQuery,
+    setSearchQuery,
+    t,
+    deleteConfirmVisible,
+    itemToDelete,
+    handleNavigateToForm,
+    handleCardPress,
+    handleDeletePress,
+    confirmDelete,
+    cancelDelete,
+  } = useCashFlowListScreen();
 
   const renderItem = ({ item }: { item: CashFlowItem }) => (
     <TouchableOpacity onPress={() => handleCardPress(item)}>

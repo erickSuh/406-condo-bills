@@ -133,6 +133,20 @@ export class CashFlowRepository {
     }
   }
 
+  async getCashFlowByCode(code: string): Promise<CashFlowItem | null> {
+    if (!this.db) return null;
+    try {
+      const result = await this.db.getFirstAsync<CashFlowItem>(
+        'SELECT * FROM cash_flow WHERE code = ? AND deleted = 0',
+        [code],
+      );
+      return result || null;
+    } catch (error) {
+      console.error('Failed to get cash flow by code:', error);
+      return null;
+    }
+  }
+
   async insertCashFlow(data: {
     code: string;
     title: string;
