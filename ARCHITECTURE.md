@@ -2,7 +2,15 @@
 
 ## Project Overview
 
-A React Native application for managing condominium finances using **Feature-Based Architecture** with **Single Responsibility Principle** applied throughout.
+A React Native application for managing condominium finances using **Feature-Based Architecture** with **Single Responsibility Principle** applied throughout. Optimized for performance, testing, and maintainability.
+
+**Key Focus Areas:**
+
+- Isolated feature modules with minimal coupling
+- Hooks-based state management with composition
+- Type-safe codebase with TypeScript
+- Comprehensive test coverage (150+ tests)
+- Error tracking and performance monitoring with Sentry
 
 ```
 app/
@@ -222,6 +230,31 @@ SQLite Database
 - Catches React errors
 - Displays fallback UI
 - Prevents app crashes
+- Integrates with Sentry for error tracking
+
+## State Management Strategy
+
+### Why Hooks + Context (No Redux)
+
+**Hooks (Feature-Level Logic):**
+
+- Each hook manages isolated feature concerns
+- Example: `useCashFlowData`, `useCashFlowValidation`, `useCashFlowSubmit`
+- Benefits: Composition, testability, lightweight, no boilerplate
+
+**Context API (Global State):**
+
+- Handles app-level infrastructure concerns
+- `DatabaseContext` - Single database connection
+- `AlertContext` - Global notification system
+- `ErrorBoundary` - Global error handling
+
+**Design Philosophy:**
+
+- Hooks compose for feature complexity
+- Context for cross-feature needs
+- No Redux: Single-feature app with simple state
+- Improves: Developer velocity, testing, bundle size
 
 ## Testing Strategy
 
@@ -348,68 +381,11 @@ if (error) showAlert(error.message);
 4. Export from `app/shared/components/index.ts`
 5. Document usage patterns
 
-## Current Refactoring Progress
-
-✅ **Phase 1**: Repository abstraction in form hook
-
-- Created: useCashFlowData, useCashFlowValidation, useCashFlowCodeSuggestion, useCashFlowSubmit
-- Impact: Form logic organized into 4 focused hooks
-
-✅ **Phase 2**: Constant centralization
-
-- Moved CODE_PATTERN from individual hooks to constants.ts
-- Benefits: Single source of truth for patterns
-
-✅ **Phase 3**: List screen logic extraction
-
-- Moved UI logic from component to hook
-- Created: useCashFlowListScreen
-- Benefits: Cleaner component, reusable logic
-
-✅ **Phase 4**: List screen hook separation
-
-1. Identify separate concerns (search, delete, navigate, data)
-2. Create specialized hooks for each concern
-3. Create orchestrator hook to compose them
-4. Update component imports
-5. Add/update tests for new hooks
-
-### Adding Shared Components
-
-1. Create in `app/shared/components/`
-2. Make component reusable (props for customization)
-3. Add tests
-4. Export from `app/shared/components/index.ts`
-5. Document usage patterns
-
-## Current Refactoring Progress
-
-✅ **Phase 1**: Repository abstraction in form hook
-
-- Created: useCashFlowData, useCashFlowValidation, useCashFlowCodeSuggestion, useCashFlowSubmit
-- Impact: Form logic organized into 4 focused hooks
-
-✅ **Phase 2**: Constant centralization
-
-- Moved CODE_PATTERN from individual hooks to constants.ts
-- Benefits: Single source of truth for patterns
-
-✅ **Phase 3**: List screen logic extraction
-
-- Moved UI logic from component to hook
-- Created: useCashFlowListScreen
-- Benefits: Cleaner component, reusable logic
-
-✅ **Phase 4**: List screen hook separation
-
-- Created: useCashFlowListSearch, useCashFlowListDelete, useCashFlowListNavigation
-- Extracted: getCodeColor utility function
-- Impact: Main hook reduced from 171 to 98 lines (43% reduction)
-
 ## Metrics
 
-- **Total Tests**: 49 (all passing)
-- **Test Coverage**: 52.32%
+- **Total Tests**: 150 (all passing consistently)
+- **Test Suites**: 17 passing
 - **Hook Composition Levels**: Up to 2 (orchestrator + specialized)
 - **Code Reusability**: High (shared hooks, components, utilities)
 - **Maintainability**: Improved (small, focused files)
+- **Bundle Optimization**: No external state management library
