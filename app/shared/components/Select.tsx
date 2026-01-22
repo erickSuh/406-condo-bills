@@ -30,7 +30,7 @@ interface SelectProps {
 
 export const Select: React.FC<SelectProps> = ({
   placeholder = 'Select an option',
-  options,
+  options = [],
   value,
   onValueChange,
   style,
@@ -92,7 +92,7 @@ export const Select: React.FC<SelectProps> = ({
                   style={styles.picker}
                   itemStyle={styles.pickerItem}
                 >
-                  {options.map(option => (
+                  {options?.map(option => (
                     <Picker.Item
                       key={option.value}
                       label={option.label}
@@ -136,7 +136,7 @@ export const Select: React.FC<SelectProps> = ({
               }}
               style={styles.invisiblePicker}
             >
-              {options.map(option => (
+              {options?.map(option => (
                 <Picker.Item
                   key={option.value}
                   label={option.label}
