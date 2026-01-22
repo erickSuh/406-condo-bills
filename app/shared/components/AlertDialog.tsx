@@ -12,6 +12,7 @@ import spaces from '@/styles/spaces';
 import { borderRadius } from '@/styles/borderRadius';
 import { SvgIcon } from './SvgIcon';
 import { Button } from './Button';
+import sizes, { minActions } from '@/styles/sizes';
 
 export interface AlertDialogProps {
   visible: boolean;
@@ -196,11 +197,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spaces.large,
     width: '100%',
+    justifyContent: 'center',
   },
   button: {
     flex: 1,
   },
   singleButton: {
-    width: '100%',
+    minWidth: minActions.action.minWidth,
+    borderRadius: borderRadius.medium,
+    paddingHorizontal: spaces.xLarge,
   },
 });
