@@ -175,7 +175,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Select type',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={true}
+                editable={!isTypeDisabled && !isReadOnly}
               />
             )}
           />
@@ -200,7 +200,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Select',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={true}
+                editable={!isReadOnly}
                 accessibilityHint={t('selectAcceptsEntries', {
                   defaultValue: 'Select',
                   ns: CASH_FLOW_FORM_NAMESPACE,
