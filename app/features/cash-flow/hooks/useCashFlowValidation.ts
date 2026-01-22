@@ -7,18 +7,15 @@ import {
   CASH_FLOW_FORM_NAMESPACE,
 } from '../constants';
 import { useTranslation } from 'react-i18next';
+import { useSentry } from '@/shared/hooks/useSentry';
 
 export const useCashFlowValidation = () => {
   const { db } = useDatabase();
   const { t } = useTranslation([CASH_FLOW_FORM_NAMESPACE, 'common']);
+  const { reportError } = useSentry();
 
   const validateCode = useCallback(
-    async (
-      code: string,
-      parentAccountId: string,
-      parentItems: CashFlowItem[],
-      suggestedCode?: string,
-    ): Promise<string | true> => {
+    async (code: string, suggestedCode?: string): Promise<string | true> => {
       if (!code.trim()) {
         return t('errorCodeBeEmpty', {
           ns: CASH_FLOW_FORM_NAMESPACE,
@@ -80,6 +77,8 @@ export const useCashFlowValidation = () => {
           });
         }
       } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        reportError(err, { hook: 'useCashFlowValidation', code });
         console.error('Failed to validate code:', error);
         return t('errorValidationFailed', {
           ns: CASH_FLOW_FORM_NAMESPACE,
@@ -89,7 +88,7 @@ export const useCashFlowValidation = () => {
 
       return true;
     },
-    [db, t],
+    [db, t, reportError],
   );
 
   const validateTitle = useCallback(

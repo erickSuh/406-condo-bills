@@ -11,6 +11,7 @@ import { useCashFlowCodeSuggestion } from './useCashFlowCodeSuggestion';
 import { useCashFlowValidation } from './useCashFlowValidation';
 import { useCashFlowSubmit } from './useCashFlowSubmit';
 import { useDatabase } from '@/shared/context/DatabaseContext';
+import { useSentry } from '@/shared/hooks/useSentry';
 
 type CashFlowFormScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -27,10 +28,16 @@ export interface CashFlowFormData {
 
 export const useCashFlowFormScreen = () => {
   let route: CashFlowFormScreenRouteProp | undefined;
+  const { trackEvent } = useSentry();
   try {
     const routeFromHook = useRoute<CashFlowFormScreenRouteProp>();
     route = routeFromHook;
-  } catch {
+  } catch (error) {
+    trackEvent(
+      `CashFlowFormScreen route error: ${error instanceof Error ? error.message : String(error)}`,
+      'error',
+      'error',
+    );
     // Route hook not available outside navigator context (e.g., in tests)
   }
 
@@ -50,7 +57,6 @@ export const useCashFlowFormScreen = () => {
   const { validateCode: validateCodeHook, validateTitle: validateTitleHook } =
     useCashFlowValidation();
   const { submitCashFlow } = useCashFlowSubmit(navigation);
-
   const [suggestedPrefix, setSuggestedPrefix] = useState<string>('');
 
   const {
@@ -103,6 +109,11 @@ export const useCashFlowFormScreen = () => {
           }
         }
       } catch (error) {
+        trackEvent(
+          `CashFlowFormScreen code suggestion failed: ${error instanceof Error ? error.message : String(error)}`,
+          'error',
+          'error',
+        );
         console.error('Failed to suggest code:', error);
       }
     };
@@ -114,24 +125,18 @@ export const useCashFlowFormScreen = () => {
     setValue,
     isReadOnly,
     suggestCode,
+    trackEvent,
   ]);
 
   const validateCode = useCallback(
     async (code: string) => {
       const error = await validateCodeHook(
         code,
-        String(parentAccountIdValue),
-        fetchedParentItems,
         suggestedPrefix ? suggestedPrefix.slice(0, -1) : undefined,
       );
       return error;
     },
-    [
-      fetchedParentItems,
-      parentAccountIdValue,
-      validateCodeHook,
-      suggestedPrefix,
-    ],
+    [validateCodeHook, suggestedPrefix],
   );
 
   const onSubmit = useCallback(

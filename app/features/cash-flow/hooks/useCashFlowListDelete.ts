@@ -4,11 +4,13 @@ import { useDatabase } from '@/shared/context/DatabaseContext';
 import { CashFlowItem } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useAlert } from '@/shared/context/AlertContext';
+import { useSentry } from '@/shared/hooks/useSentry';
 
 export const useCashFlowListDelete = (
   onDeleteSuccess: (deletedIds: number[]) => void,
 ) => {
   const { db } = useDatabase();
+  const { reportError } = useSentry();
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<CashFlowItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -43,13 +45,14 @@ export const useCashFlowListDelete = (
         setDeleteError(null);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
+        reportError(error, { hook: 'useCashFlowListDelete', itemId: id });
         setDeleteError(error);
         console.error('Failed to delete item:', error);
       } finally {
         setIsDeleting(false);
       }
     },
-    [db, onDeleteSuccess, t, showAlert],
+    [db, onDeleteSuccess, t, showAlert, reportError],
   );
 
   const confirmDelete = useCallback(() => {
