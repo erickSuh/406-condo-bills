@@ -1,17 +1,163 @@
-# 009-nlw-plant-manager
+# 406-condo-bills
 
-NLW #5 - Application with react-native with expo.
+A modern React Native application for managing financial flows and accounting codes in a condominium building using Expo and SQLite.
 
-This application is a plants manager to remember you to take care of them.
+## 📱 Features
 
-## How to run
+- ✅ **Cash Flow Management** - Create and manage hierarchical accounting codes
+- ✅ **SQLite Database** - Local data persistence with migration system
+- ✅ **Multi-language Support** - Portuguese language support with i18n
+- ✅ **OTA Updates** - Over-the-air updates using Expo Updates
+- ✅ **Custom UI Components** - Design system with consistent styling
+- ✅ **Comprehensive Validation** - Code format, depth, and uniqueness validation
+- ✅ **Error Handling** - Custom error boundaries and alert dialogs
+- ✅ **Type-Safe** - Full TypeScript support
 
-1 - Install application with `yarn` or `npm install`;
+## 🏗️ Architecture
 
-2 - Set your local ip on /app/services/api.ts;
+This project follows a **Feature-Based Architecture** with:
 
-3 - Set your ip on `server` script on package file;
+- **Features**: Isolated business logic modules (e.g., `features/cash-flow`)
+- **Shared**: Reusable components, contexts, and utilities
+- **Infrastructure**: Database, i18n, and other system-level services
+- **Styles**: Centralized design system (colors, fonts, spacing, borders)
 
-4 - Run `server` script;
+```
+app/
+├── features/
+│   └── cash-flow/          # Main business feature
+│       ├── screens/        # React components (screens)
+│       ├── hooks/          # Custom hooks (9 specialized hooks)
+│       ├── utils/          # Utility functions
+│       ├── api.ts          # Repository pattern for data access
+│       ├── types.ts        # TypeScript interfaces
+│       ├── constants.ts    # Feature constants
+│       └── __tests__/      # Unit tests
+├── shared/
+│   ├── components/         # Reusable UI components
+│   ├── context/            # React contexts (Alert, Database, ErrorBoundary)
+│   └── types/              # Shared types
+├── infrastructure/
+│   ├── database/           # SQLite with migrations
+│   └── i18n/               # Internationalization
+└── styles/                 # Design system tokens
+```
 
-5 - In another terminal run `start` script;
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- yarn or npm
+- Expo CLI (optional, for EAS builds)
+
+### Installation
+
+```bash
+# Install dependencies
+yarn install
+# or
+npm install
+
+# Start development server
+yarn start
+# or
+npm start
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+yarn test
+
+# Run specific test pattern
+yarn test --testPathPattern="cash-flow"
+
+# Run with coverage
+yarn test --coverage
+```
+
+### Building & Deployment
+
+```bash
+# Preview build (internal distribution)
+eas update --channel preview
+
+# Production build
+eas build --platform ios
+eas build --platform android
+```
+
+## 📚 Project Highlights
+
+### Database
+
+- SQLite with Expo SQLite
+- Automatic migration system on app launch
+- Schema versioning and rollback support
+
+### Validation
+
+- **CODE_PATTERN_MAX_DEPTH_6**: Validates hierarchical codes with max 6 levels
+- Format: `1`, `1.2`, `1.2.3`, etc. (each segment 1-999)
+- Automatic depth validation based on parent codes
+
+### Hooks Architecture
+
+Custom hooks for separation of concerns:
+
+1. `useCashFlowData` - Data fetching and caching
+2. `useCashFlowValidation` - Code validation logic
+3. `useCashFlowCodeSuggestion` - Smart code suggestions
+4. `useCashFlowSubmit` - Form submission handling
+5. `useCashFlowListDelete` - Deletion with cascade
+6. `useCashFlowFormScreen` - Form orchestration
+7. `useCashFlowListScreen` - List screen logic
+8. `useCashFlowListSearch` - Search functionality
+9. `useCashFlowListNavigation` - Navigation state
+
+### i18n (Internationalization)
+
+- Portuguese (pt-BR) support
+- Namespaced translation files
+- Interpolation support for dynamic values
+
+## 📊 Test Coverage
+
+- **150+ tests** passing
+- Unit tests for hooks, components, and screens
+- Integration tests for database and API
+- Component snapshot tests
+
+## 🎨 Design System
+
+Centralized design tokens:
+mponents, and screens
+- Integration tests for database and API
+- Component snapshot tests
+
+## 🎨 Design System
+
+Centralized design tokens:
+
+- **Colors**: Primary, secondary, success, error, warning, info
+- **Typography**: Roboto and Rubik fonts
+- **Spacing**: Consistent 4-unit scale
+- **Border Radius**: Small, medium, large, full
+- **Sizes**: Fine-tuned spacing values
+
+## 🔧 Technology Stack
+
+- **React Native** - Cross-platform mobile framework
+- **Expo** - Development platform and managed service
+- **TypeScript** - Type safety
+- **SQLite** - Local database
+- **React Navigation** - Navigation
+- **i18next** - Internationalization
+- **React Hook Form** - Form management
+- **Jest** - Testing framework
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
