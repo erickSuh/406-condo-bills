@@ -68,6 +68,54 @@ app/
 - No Redux needed for single-feature apps with simple state
 - Improves: Developer velocity, testing, bundle size, learning curve
 
+### Architectural Pattern (MVVM)
+
+This project implements **Model-View-ViewModel (MVVM)** architecture:
+
+**Model Layer** - Data Access
+
+```typescript
+// app/features/cash-flow/api.ts
+export class CashFlowRepository {
+  async getCashFlows(): Promise<CashFlowItem[]> { ... }
+  async insertCashFlow(data: CreateCashFlowInput): Promise<void> { ... }
+}
+```
+
+**ViewModel Layer** - Business Logic
+
+```typescript
+// app/features/cash-flow/hooks/useCashFlowFormScreen.ts
+export const useCashFlowFormScreen = () => {
+  const { parentItems } = useCashFlowData();           // Model
+  const { validateCode } = useCashFlowValidation();    // Logic
+  const { suggestCode } = useCashFlowCodeSuggestion(); // Logic
+
+  return { control, errors, handleSubmit, ... };      // ViewModel interface
+};
+```
+
+**View Layer** - UI Rendering
+
+```typescript
+// app/features/cash-flow/screens/CashFlowFormScreen.tsx
+export const CashFlowFormScreen: React.FC = () => {
+  const { control, errors, handleSubmit } = useCashFlowFormScreen(); // Get ViewModel
+
+  return (
+    <Controller control={control} name="code" ... />  // Pure UI rendering
+  );
+};
+```
+
+**MVVM Benefits:**
+
+- **Separation of Concerns**: View only renders, ViewModel handles logic, Model manages data
+- **Testability**: Each layer tested independently without other layers
+- **Reusability**: ViewModels can be reused by multiple Views
+- **Maintainability**: Clear boundaries between layers
+- **Type Safety**: TypeScript ensures contracts between layers
+
 ## 🚀 Getting Started
 
 ### Prerequisites
