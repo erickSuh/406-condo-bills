@@ -7,7 +7,7 @@ A modern React Native application for managing financial flows and accounting co
 - ✅ **Cash Flow Management** - Create and manage hierarchical accounting codes
 - ✅ **SQLite Database** - Local data persistence with migration system
 - ✅ **Multi-language Support** - Portuguese language support with i18n
-- ✅ **OTA Updates** - Over-the-air updates using Expo Updates
+- ✅ **OTA Updates** - Over-the-air updates using Expo Updates (see [OTA_updates.md](OTA_updates.md))
 - ✅ **Error Tracking** - Sentry integration for error monitoring and analytics
 - ✅ **Custom UI Components** - Design system with consistent styling
 - ✅ **Comprehensive Validation** - Code format, depth, and uniqueness validation
@@ -22,6 +22,8 @@ This project follows a **Feature-Based Architecture** with:
 - **Shared**: Reusable components, contexts, and utilities
 - **Infrastructure**: Database, i18n, and other system-level services
 - **Styles**: Centralized design system (colors, fonts, spacing, borders)
+
+For detailed architectural decisions and design patterns, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ```
 app/
@@ -43,6 +45,76 @@ app/
 │   └── i18n/               # Internationalization
 └── styles/                 # Design system tokens
 ```
+
+### State Management Strategy
+
+**Why Hooks over Redux or Context API for Business Logic?**
+
+- **Hooks (Feature-Level)**: Isolated, reusable business logic
+  - `useCashFlowData()` - Data fetching & caching
+  - `useCashFlowValidation()` - Business rule validation
+  - `useCashFlowSubmit()` - Form submission
+  - Benefits: Composition, testability, lightweight, no boilerplate
+
+- **Context API (Global State)**: Truly global data needed across the app
+  - `DatabaseContext` - Single database connection
+  - `AlertContext` - Global alert system
+  - `ErrorBoundary` - Global error handling
+
+**Design Philosophy:**
+
+- Hooks manage feature-specific concerns locally
+- Context handles app-level infrastructure
+- No Redux needed for single-feature apps with simple state
+- Improves: Developer velocity, testing, bundle size, learning curve
+
+### Architectural Pattern (MVVM)
+
+This project implements **Model-View-ViewModel (MVVM)** architecture:
+
+**Model Layer** - Data Access
+
+```typescript
+// app/features/cash-flow/api.ts
+export class CashFlowRepository {
+  async getCashFlows(): Promise<CashFlowItem[]> { ... }
+  async insertCashFlow(data: CreateCashFlowInput): Promise<void> { ... }
+}
+```
+
+**ViewModel Layer** - Business Logic
+
+```typescript
+// app/features/cash-flow/hooks/useCashFlowFormScreen.ts
+export const useCashFlowFormScreen = () => {
+  const { parentItems } = useCashFlowData();           // Model
+  const { validateCode } = useCashFlowValidation();    // Logic
+  const { suggestCode } = useCashFlowCodeSuggestion(); // Logic
+
+  return { control, errors, handleSubmit, ... };      // ViewModel interface
+};
+```
+
+**View Layer** - UI Rendering
+
+```typescript
+// app/features/cash-flow/screens/CashFlowFormScreen.tsx
+export const CashFlowFormScreen: React.FC = () => {
+  const { control, errors, handleSubmit } = useCashFlowFormScreen(); // Get ViewModel
+
+  return (
+    <Controller control={control} name="code" ... />  // Pure UI rendering
+  );
+};
+```
+
+**MVVM Benefits:**
+
+- **Separation of Concerns**: View only renders, ViewModel handles logic, Model manages data
+- **Testability**: Each layer tested independently without other layers
+- **Reusability**: ViewModels can be reused by multiple Views
+- **Maintainability**: Clear boundaries between layers
+- **Type Safety**: TypeScript ensures contracts between layers
 
 ## 🚀 Getting Started
 
@@ -97,6 +169,43 @@ yarn test --testPathPattern="cash-flow"
 yarn test --coverage
 ```
 
+### Testing (Jest)
+
+**Why Jest over Mocha, Vitest, or native test runners?**
+
+- **Zero Config**: Works out-of-the-box with Expo and React Native
+- **Snapshot Testing**: Perfect for component regression detection
+- **Coverage Reports**: Built-in coverage analysis and reporting
+- **Mocking & Spying**: Powerful mocking capabilities for unit tests
+- **Performance**: Parallel test execution with watch mode
+- **Developer Experience**: Clear error messages and assertion library
+
+```typescript
+// Example: Testing a validation hook
+describe('useCashFlowValidation', () => {
+  it('should validate code format', async () => {
+    const { result } = renderHook(() => useCashFlowValidation());
+
+    const isValid = await result.current.validateCode('1.2.3');
+    expect(isValid).toBe(true);
+  });
+
+  it('should reject invalid codes', async () => {
+    const { result } = renderHook(() => useCashFlowValidation());
+
+    const error = await result.current.validateCode('invalid');
+    expect(error).toBeDefined();
+  });
+});
+```
+
+**Coverage:**
+
+- **150+ tests** passing consistently
+- Unit tests for hooks, components, and screens
+- Integration tests for database operations
+- Component snapshot tests for regression detection
+
 ### Building & Deployment
 
 ```bash
@@ -107,6 +216,34 @@ eas update --channel preview
 eas build --platform ios
 eas build --platform android
 ```
+
+### Commit Linting (commitlint)
+
+**Why commitlint for conventional commits?**
+
+- **Enforces Consistency**: All commits follow Conventional Commits standard
+- **Automated Changelog**: Enables automatic version bumping and changelog generation
+- **Better History**: Clear, searchable commit messages (`feat:`, `fix:`, `docs:`, etc.)
+- **CI/CD Integration**: Prevents bad commits from reaching main branch
+- **Team Standards**: Enforces commit standards across all developers
+- **Pre-commit Validation**: Hooks reject invalid commits immediately
+
+```bash
+# Commit message format (enforced by commitlint)
+git commit -m "feat: add new cache system"      # New feature
+git commit -m "fix: resolve memory leak"        # Bug fix
+git commit -m "docs: update README"             # Documentation
+git commit -m "refactor: simplify validation"   # Code refactoring
+git commit -m "test: add hook tests"            # Tests
+git commit -m "chore: update dependencies"      # Build/tooling
+```
+
+**Configuration** (`commitlint.config.js`):
+
+- Uses Conventional Commits preset
+- Enforced on all commits via Git hooks
+- Prevents merges with non-compliant messages
+- Enables automated version management
 
 ## 📚 Project Highlights
 
@@ -120,7 +257,6 @@ eas build --platform android
 
 - **Automatic Error Capture**: ErrorBoundary catches all React errors
 - **Performance Monitoring**: Track slow transactions and performance issues
-- **Session Replay**: Replay sessions with errors for debugging
 - **User Context**: Track which user experienced errors
 - **Custom Events**: Use `useSentry` hook to track custom events
 
@@ -155,6 +291,43 @@ Custom hooks for separation of concerns:
 8. `useCashFlowListSearch` - Search functionality
 9. `useCashFlowListNavigation` - Navigation state
 
+### Form Management (React Hook Form)
+
+**Why React Hook Form over Formik or manual state?**
+
+- **Performance**: Minimizes re-renders with uncontrolled components
+- **Bundle Size**: ~8.5KB vs Formik's ~15KB
+- **Developer Experience**: Simple API with less boilerplate
+- **Validation**: Built-in async validation and custom rules
+- **React Native Compatible**: Works seamlessly with Expo
+
+```typescript
+// Usage in CashFlowFormScreen
+const { control, handleSubmit, formState: { errors }, watch } = useForm<CashFlowFormData>({
+  defaultValues: { code: '', title: '', type: '0', acceptsEntries: 0 },
+});
+
+// Integrate with custom validation hooks
+const { validateCode, validateTitle } = useCashFlowValidation();
+
+// Controller wraps native inputs for form integration
+<Controller
+  control={control}
+  name="code"
+  rules={{ validate: validateCode }}
+  render={({ field: { value, onChange } }) => (
+    <Input value={value} onChangeText={onChange} />
+  )}
+/>
+```
+
+**Benefits:**
+
+- Decoupled validation logic (hooks)
+- Efficient re-renders
+- TypeScript support with strong typing
+- Easy integration with custom validation
+
 ### i18n (Internationalization)
 
 - Portuguese (pt-BR) support
@@ -165,14 +338,6 @@ Custom hooks for separation of concerns:
 
 - **150+ tests** passing
 - Unit tests for hooks, components, and screens
-- Integration tests for database and API
-- Component snapshot tests
-
-## 🎨 Design System
-
-Centralized design tokens:
-mponents, and screens
-
 - Integration tests for database and API
 - Component snapshot tests
 
@@ -190,12 +355,14 @@ Centralized design tokens:
 
 - **React Native** - Cross-platform mobile framework
 - **Expo** - Development platform and managed service
-- **TypeScript** - Type safety
-- **SQLite** - Local database
-- **React Navigation** - Navigation
-- **i18next** - Internationalization
-- **React Hook Form** - Form management
-- **Jest** - Testing framework
+- **TypeScript** - Type safety and code documentation
+- **SQLite** - Local persistent database
+- **React Navigation** - Screen and navigation management
+- **i18next** - Multi-language support
+- **React Hook Form** - Efficient form state management
+- **Jest** - Testing framework with snapshots and coverage
+- **commitlint** - Enforces Conventional Commits convention
+- **Sentry** - Error tracking and performance monitoring
 
 ## 📄 License
 

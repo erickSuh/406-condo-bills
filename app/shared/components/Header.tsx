@@ -25,7 +25,11 @@ export const Header: React.FC<HeaderProps> = ({
   const { goBack } = useNavigation();
 
   const handleGoBack = () => {
-    goBack();
+    try {
+      goBack();
+    } catch (error) {
+      console.warn('[Header] Navigation error:', error);
+    }
   };
 
   return (
