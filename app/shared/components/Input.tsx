@@ -12,6 +12,7 @@ export const Input = ({
   ref,
   style,
   icon,
+  value,
   ...rest
 }: TextInputProps & {
   ref?: React.Ref<TextInput>;
@@ -21,7 +22,7 @@ export const Input = ({
 
   return (
     <View style={[styles.container, focused && styles.containerFocused, style]}>
-      {!focused && icon && (
+      {!focused && icon && !value?.length && (
         <SvgIcon
           name={icon as any}
           size={20}
@@ -47,6 +48,7 @@ export const Input = ({
         }}
         placeholder={focused ? '' : placeholder}
         placeholderTextColor={colors.font_caption}
+        value={value}
         {...rest}
       />
     </View>

@@ -1,6 +1,6 @@
 {
   "title": "Plano de Contas",
-  "searchInputPlaceholder": "Pesquisar contas",
+  "searchInputPlaceholder": "Pesquisar conta",
   "listHeader": "Listagem",
   "listHeaderRegistryCount_one": "{{count}} registro",
   "listHeaderRegistryCount_other": "{{count}} registros",

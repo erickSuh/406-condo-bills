@@ -1,19 +1,40 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDatabase } from '@/shared/context/DatabaseContext';
 import { CashFlowRepository } from '../api';
 import { CashFlowItem } from '../types';
 import { useTranslation } from 'react-i18next';
 import { CASH_FLOW_LIST_NAMESPACE } from '../constants';
+import { useCashFlowListSearch } from './useCashFlowListSearch';
+import { useCashFlowListDelete } from './useCashFlowListDelete';
+import { useCashFlowListNavigation } from './useCashFlowListNavigation';
 
 export const useCashFlowListScreen = () => {
   const { db, isReady } = useDatabase();
   const [items, setItems] = useState<CashFlowItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { t } = useTranslation(CASH_FLOW_LIST_NAMESPACE);
   const itemsLoadedRef = useRef(false);
+
+  // Use specialized hooks
+  const { searchQuery, setSearchQuery, filteredItems } =
+    useCashFlowListSearch(items);
+
+  const handleDeleteSuccess = useCallback((deletedIds: number[]) => {
+    setItems(current => current.filter(item => !deletedIds.includes(item.id)));
+  }, []);
+  const {
+    deleteConfirmVisible,
+    itemToDelete,
+    isDeleting,
+    deleteError,
+    handleDeletePress,
+    confirmDelete,
+    cancelDelete,
+  } = useCashFlowListDelete(handleDeleteSuccess);
+
+  const { handleNavigateToForm, handleCardPress } = useCashFlowListNavigation();
 
   const refetchItems = useCallback(async () => {
     if (!db) return;
@@ -51,42 +72,6 @@ export const useCashFlowListScreen = () => {
     }, [refetchItems]),
   );
 
-  const filteredItems = useMemo(() => {
-    if (searchQuery.trim() === '') {
-      return items;
-    }
-
-    const query = searchQuery.toLowerCase();
-    return items.filter(
-      item =>
-        item.code.toLowerCase().includes(query) ||
-        item.title.toLowerCase().includes(query),
-    );
-  }, [items, searchQuery]);
-
-  const handleDelete = useCallback(
-    async (id: number) => {
-      if (!db) return;
-      try {
-        const repository = new CashFlowRepository(db);
-
-        const childrenIds = await repository.getAllChildrenRecursive(id);
-        const idsToRemove = [id, ...childrenIds];
-
-        await repository.deleteCashFlow(id);
-
-        setItems(current =>
-          current.filter(item => !idsToRemove.includes(item.id)),
-        );
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        console.error('Failed to delete item:', error);
-      }
-    },
-    [db],
-  );
-
   return {
     items,
     filteredItems,
@@ -94,7 +79,15 @@ export const useCashFlowListScreen = () => {
     setSearchQuery,
     isLoading,
     error,
-    handleDelete,
     t,
+    deleteConfirmVisible,
+    itemToDelete,
+    isDeleting,
+    deleteError,
+    handleNavigateToForm,
+    handleCardPress,
+    handleDeletePress,
+    confirmDelete,
+    cancelDelete,
   };
 };

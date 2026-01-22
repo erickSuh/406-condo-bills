@@ -1,10 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
-import { Text, Pressable, Alert } from 'react-native';
-import { AlertProvider, useAlert, AlertMessage } from '../AlertContext';
-
-// Mock only the Alert.alert method, not the entire module
-jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from '@testing-library/react-native';
+import { Text, Pressable } from 'react-native';
+import { AlertProvider, useAlert } from '../AlertContext';
 
 const TestComponent: React.FC = () => {
   const { showAlert } = useAlert();
@@ -73,7 +75,7 @@ describe('AlertContext and useAlert Hook', () => {
   });
 
   describe('showAlert Function', () => {
-    it('should show native alert for error type', async () => {
+    it('should display AlertDialog when showAlert is called', async () => {
       render(
         <AlertProvider>
           <TestComponent />
@@ -83,11 +85,10 @@ describe('AlertContext and useAlert Hook', () => {
       const button = screen.getByTestId('test-alert-component');
       fireEvent.press(button);
 
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'Test Title',
-        'Test Message',
-        expect.any(Array),
-      );
+      await waitFor(() => {
+        expect(screen.getByText('Test Title')).toBeTruthy();
+        expect(screen.getByText('Test Message')).toBeTruthy();
+      });
     });
   });
 });

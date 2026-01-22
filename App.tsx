@@ -16,7 +16,7 @@ import { AlertProvider } from './app/shared/context/AlertContext';
 import { ErrorBoundary } from './app/shared/context/ErrorBoundary';
 import { initializeDatabase } from './app/infrastructure/database';
 import { DatabaseProvider } from '@/shared/context/DatabaseContext';
-import { useUpdateCheck } from './app/hooks/useUpdateCheck';
+import { useUpdateCheck } from './app/shared/hooks/useUpdateCheck';
 import './app/infrastructure/i18n';
 
 function AppContent() {

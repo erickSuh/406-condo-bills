@@ -1,10 +1,7 @@
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet, FlatList, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
-import { useRoute } from '@react-navigation/native';
-import type { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '@/routes/types';
 import colors from '@/styles/colors';
 import fonts from '@/styles/fonts';
 import spaces from '@/styles/spaces';
@@ -13,25 +10,7 @@ import { Select } from '@/shared/components/Select';
 import { useCashFlowFormScreen } from '../hooks/useCashFlowFormScreen';
 import { CASH_FLOW_FORM_NAMESPACE } from '../constants';
 
-type CashFlowFormScreenRouteProp = RouteProp<
-  RootStackParamList,
-  'CashFlowFormScreen'
->;
-
 export const CashFlowFormScreen: React.FC = () => {
-  let route: CashFlowFormScreenRouteProp | undefined;
-  try {
-    const routeFromHook = useRoute<CashFlowFormScreenRouteProp>();
-    route = routeFromHook;
-  } catch {
-    // Route hook not available outside navigator context (e.g., in tests)
-  }
-
-  const [isReadOnly, setIsReadOnly] = useState(
-    route?.params?.isReadOnly ?? false,
-  );
-  const itemToView = route?.params?.item;
-
   const {
     control,
     errors,
@@ -40,35 +19,13 @@ export const CashFlowFormScreen: React.FC = () => {
     parentItems,
     flowTypes,
     acceptsEntriesOptions,
-    watch,
     validateCode,
-    parentCode,
+    suggestedPrefix,
     t,
-    setValue,
+    isTypeDisabled,
+    isReadOnly,
+    itemToView,
   } = useCashFlowFormScreen();
-
-  useEffect(() => {
-    if (itemToView && isReadOnly) {
-      setValue('code', itemToView.code);
-      setValue('title', itemToView.title);
-      setValue('type', String(itemToView.type));
-      setValue('parentAccountId', '1');
-      setValue('acceptsEntries', '1');
-    }
-  }, [itemToView, isReadOnly, setValue]);
-
-  const parentAccountId = watch('parentAccountId');
-  const isTypeDisabled = !!parentAccountId;
-
-  const formData = useMemo(
-    () => ({
-      parentAccountId,
-      isTypeDisabled,
-      parentCode,
-      validateCode,
-    }),
-    [parentAccountId, isTypeDisabled, parentCode, validateCode],
-  );
 
   const renderFormContent = useCallback(
     () => (
@@ -89,17 +46,21 @@ export const CashFlowFormScreen: React.FC = () => {
                 value={value}
                 onValueChange={onChange}
                 placeholder={t('selectParentAccount', {
-                  defaultValue: 'Selecione a conta',
+                  defaultValue: 'Selecione a conta pai',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
                 editable={!isReadOnly}
+                accessibilityHint={t('selectParentAccount', {
+                  defaultValue: 'Selecione a conta pai',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })}
               />
             )}
           />
         </View>
 
         <View style={styles.formSection}>
-          <Text style={styles.label}>
+          <Text style={styles.label} nativeID="code-label">
             {t('code', {
               defaultValue: 'Código',
               ns: CASH_FLOW_FORM_NAMESPACE,
@@ -110,15 +71,20 @@ export const CashFlowFormScreen: React.FC = () => {
             name="code"
             rules={{
               required: 'Code is required',
-              validate: formData.validateCode,
+              validate: validateCode,
             }}
             render={({ field: { value, onChange } }) => {
-              const prefix = formData.parentCode
-                ? `${formData.parentCode}.`
-                : '';
+              const newValue = value
+                .replaceAll(',', '.')
+                .replaceAll(/[^0-9.]/g, '');
+
               const handleCodeChange = (text: string) => {
-                if (prefix && !text.startsWith(prefix)) {
-                  onChange(prefix);
+                if (isReadOnly) {
+                  return;
+                }
+
+                if (suggestedPrefix && !text.startsWith(suggestedPrefix)) {
+                  onChange(suggestedPrefix);
                 } else {
                   onChange(text);
                 }
@@ -131,10 +97,16 @@ export const CashFlowFormScreen: React.FC = () => {
                       defaultValue: 'Ex: 1.1',
                       ns: CASH_FLOW_FORM_NAMESPACE,
                     })}
-                    value={value || prefix}
+                    value={newValue || suggestedPrefix}
                     onChangeText={handleCodeChange}
                     maxLength={20}
                     editable={!isReadOnly}
+                    keyboardType="numeric"
+                    accessibilityLabelledBy={'code-label'}
+                    accessibilityLabel={t('code', {
+                      defaultValue: 'Código',
+                      ns: CASH_FLOW_FORM_NAMESPACE,
+                    })}
                   />
                   {errors.code && (
                     <Text style={styles.error}>{errors.code.message}</Text>
@@ -146,7 +118,7 @@ export const CashFlowFormScreen: React.FC = () => {
         </View>
 
         <View style={styles.formSection}>
-          <Text style={styles.label}>
+          <Text style={styles.label} nativeID="name-label">
             {t('name', { defaultValue: 'Nome', ns: CASH_FLOW_FORM_NAMESPACE })}
           </Text>
           <Controller
@@ -169,6 +141,11 @@ export const CashFlowFormScreen: React.FC = () => {
                   onChangeText={onChange}
                   maxLength={120}
                   editable={!isReadOnly}
+                  accessibilityLabelledBy={'name-label'}
+                  accessibilityHint={t('namePlaceholder', {
+                    defaultValue: 'Nome da conta',
+                    ns: CASH_FLOW_FORM_NAMESPACE,
+                  })}
                 />
                 {errors.title && (
                   <Text style={styles.error}>{errors.title.message}</Text>
@@ -194,7 +171,7 @@ export const CashFlowFormScreen: React.FC = () => {
                   defaultValue: 'Select type',
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
-                editable={!formData.isTypeDisabled && !isReadOnly}
+                editable={!isTypeDisabled && !isReadOnly}
               />
             )}
           />
@@ -220,6 +197,10 @@ export const CashFlowFormScreen: React.FC = () => {
                   ns: CASH_FLOW_FORM_NAMESPACE,
                 })}
                 editable={!isReadOnly}
+                accessibilityHint={t('selectAcceptsEntries', {
+                  defaultValue: 'Select',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })}
               />
             )}
           />
@@ -233,7 +214,10 @@ export const CashFlowFormScreen: React.FC = () => {
       parentItems,
       flowTypes,
       acceptsEntriesOptions,
-      formData,
+      isReadOnly,
+      suggestedPrefix,
+      isTypeDisabled,
+      validateCode,
     ],
   );
 
@@ -245,10 +229,17 @@ export const CashFlowFormScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Header
-          title={t('title', {
-            defaultValue: isReadOnly ? 'Visualizar Conta' : 'Inserir Conta',
-            ns: CASH_FLOW_FORM_NAMESPACE,
-          })}
+          title={
+            itemToView && isReadOnly
+              ? t('titleEdit', {
+                  defaultValue: 'Visualizar Conta',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })
+              : t('title', {
+                  defaultValue: 'Inserir Conta',
+                  ns: CASH_FLOW_FORM_NAMESPACE,
+                })
+          }
           icon={isReadOnly ? undefined : 'done'}
           callToAction={isReadOnly ? undefined : handleSubmit}
           showGoBack

@@ -27,10 +27,3 @@ export const initDatabase = async () => {
 
   return initPromise;
 };
-
-export const getDatabase = async () => {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync(dbName);
-  }
-  return db;
-};

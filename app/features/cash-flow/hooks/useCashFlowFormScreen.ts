@@ -1,13 +1,21 @@
 import { useForm } from 'react-hook-form';
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { useAlert } from '@/shared/context/AlertContext';
-import { CashFlowRepository } from '../api';
-import { useDatabase } from '@/shared/context/DatabaseContext';
-import { CashFlowItem, FlowType } from '../types';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import type { RouteProp, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '@/routes/types';
 import { SelectOption } from '@/shared/components';
 import { useTranslation } from 'react-i18next';
 import { CASH_FLOW_FORM_NAMESPACE } from '../constants';
-import { useNavigation } from '@react-navigation/native';
+import { useCashFlowData } from './useCashFlowData';
+import { useCashFlowCodeSuggestion } from './useCashFlowCodeSuggestion';
+import { useCashFlowValidation } from './useCashFlowValidation';
+import { useCashFlowSubmit } from './useCashFlowSubmit';
+import { useDatabase } from '@/shared/context/DatabaseContext';
+
+type CashFlowFormScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'CashFlowFormScreen'
+>;
 
 export interface CashFlowFormData {
   parentAccountId: string | number;
@@ -17,57 +25,32 @@ export interface CashFlowFormData {
   acceptsEntries: string | number;
 }
 
-const suggestNextCode = (
-  parentCode: string,
-  childrenCodes: string[],
-): string => {
-  const parentSegments = parentCode.split('.');
-  const requiredDepth = parentSegments.length + 1;
-
-  if (!childrenCodes.length) {
-    return `${parentCode}.1`;
-  }
-
-  const correctDepthChildren = childrenCodes.filter(code => {
-    const segments = code.split('.');
-    return segments.length === requiredDepth;
-  });
-
-  if (!correctDepthChildren.length) {
-    return `${parentCode}.1`;
-  }
-
-  const lastSegments = correctDepthChildren.map(code => {
-    const parts = code.split('.');
-    return parseInt(parts[parts.length - 1], 10);
-  });
-
-  const maxSegment = Math.max(...lastSegments);
-  const nextSegment = maxSegment + 1;
-
-  if (nextSegment > 999) {
-    const segments = parentCode.split('.');
-    return segments
-      .map((seg, index) => {
-        if (index === segments.length - 1) {
-          return String(Number(seg) + 1);
-        }
-        return seg;
-      })
-      .join('.');
-  }
-
-  return `${parentCode}.${nextSegment}`;
-};
-
 export const useCashFlowFormScreen = () => {
-  const { showAlert } = useAlert();
-  const { db, isReady } = useDatabase();
-  const [isLoading, setIsLoading] = useState(false);
-  const [parentItems, setParentItems] = useState<CashFlowItem[]>([]);
-  const [flowTypes, setFlowTypes] = useState<FlowType[]>([]);
+  let route: CashFlowFormScreenRouteProp | undefined;
+  try {
+    const routeFromHook = useRoute<CashFlowFormScreenRouteProp>();
+    route = routeFromHook;
+  } catch {
+    // Route hook not available outside navigator context (e.g., in tests)
+  }
+
+  const [isReadOnly] = useState(route?.params?.isReadOnly ?? false);
+  const itemToView = route?.params?.item;
   const { t } = useTranslation([CASH_FLOW_FORM_NAMESPACE, 'common']);
-  const { goBack } = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>();
+  const { isReady } = useDatabase();
+
+  const {
+    parentItems: fetchedParentItems,
+    flowTypes,
+    isLoading,
+    refetchItems,
+  } = useCashFlowData();
+  const { suggestCode } = useCashFlowCodeSuggestion();
+  const { validateCode: validateCodeHook } = useCashFlowValidation();
+  const { submitCashFlow } = useCashFlowSubmit(navigation);
+
+  const [suggestedPrefix, setSuggestedPrefix] = useState<string>('');
 
   const {
     control,
@@ -78,199 +61,98 @@ export const useCashFlowFormScreen = () => {
     watch,
   } = useForm<CashFlowFormData>({
     defaultValues: {
-      parentAccountId: '1',
+      parentAccountId: undefined,
       code: '',
       title: '',
       type: '0',
-      acceptsEntries: '1',
+      acceptsEntries: 0,
     },
   });
 
   const parentAccountIdValue = watch('parentAccountId');
 
-  const refetchItems = useCallback(async () => {
-    if (!db) return;
-    try {
-      const repository = new CashFlowRepository(db);
-      const items = await repository.getCashFlowAbleToBeParent();
-      setParentItems(items);
-    } catch (error) {
-      console.error('Failed to load parent items:', error);
-    }
-  }, [db]);
+  const isTypeDisabled = useMemo(() => {
+    return !!parentAccountIdValue;
+  }, [parentAccountIdValue]);
 
   useEffect(() => {
     if (!isReady) return;
-
-    const loadParentItems = async () => {
-      try {
-        await refetchItems();
-      } catch (error) {
-        console.error('Failed to load parent items:', error);
-      }
-    };
-
-    loadParentItems();
+    refetchItems();
   }, [isReady, refetchItems]);
 
   useEffect(() => {
-    if (!db || !parentAccountIdValue) {
+    if (isReadOnly) {
       return;
     }
 
-    const suggestCode = async () => {
+    const handleCodeSuggestion = async () => {
       try {
-        const repository = new CashFlowRepository(db);
-        const parentItem = parentItems.find(
-          item => item.id === Number(parentAccountIdValue),
-        );
+        const parentItem = parentAccountIdValue
+          ? fetchedParentItems.find(
+              item => item.id === Number(parentAccountIdValue),
+            )
+          : undefined;
 
-        if (!parentItem) return;
-
-        const allCashFlows = await repository.getCashFlowChildren();
-        const childrenCodes = allCashFlows
-          .filter(item => item.code.startsWith(parentItem.code + '.'))
-          .map(item => item.code);
-
-        const suggested = suggestNextCode(parentItem.code, childrenCodes);
-
-        if (suggested) {
-          setValue('code', suggested);
+        const { code, prefix } = await suggestCode(parentItem);
+        if (code) {
+          setValue('code', code);
+          setSuggestedPrefix(prefix);
+          if (parentItem) {
+            setValue('type', String(parentItem.type));
+          }
         }
-
-        setValue('type', String(parentItem.type));
       } catch (error) {
         console.error('Failed to suggest code:', error);
       }
     };
 
-    suggestCode();
-  }, [db, parentAccountIdValue, parentItems, setValue]);
+    handleCodeSuggestion();
+  }, [
+    parentAccountIdValue,
+    fetchedParentItems,
+    setValue,
+    isReadOnly,
+    suggestCode,
+  ]);
 
   const validateCode = useCallback(
     async (code: string) => {
-      if (!code.trim()) {
-        return t('errorCodeBeEmpty', {
-          ns: CASH_FLOW_FORM_NAMESPACE,
-          defaultValue: 'Código não pode estar vazio',
-        });
-      }
-
-      if (!db || !parentAccountIdValue) {
-        return true;
-      }
-
-      try {
-        const repository = new CashFlowRepository(db);
-        const parentItem = parentItems.find(
-          item => item.id === Number(parentAccountIdValue),
-        );
-
-        if (!parentItem) {
-          return true;
-        }
-
-        const expectedPrefix = parentItem.code + '.';
-        if (!code.startsWith(expectedPrefix)) {
-          return t('errorCodePrefix', {
-            ns: CASH_FLOW_FORM_NAMESPACE,
-            defaultValue: `O código deve começar com "${expectedPrefix}"`,
-            expectedPrefix,
-          });
-        }
-
-        const parentSegments = parentItem.code.split('.');
-        const codeSegments = code.split('.');
-        const expectedDepth = parentSegments.length + 1;
-        if (codeSegments.length !== expectedDepth) {
-          return t('errorInvalidCodeFormat', {
-            ns: CASH_FLOW_FORM_NAMESPACE,
-            defaultValue: `O código deve ter exatamente ${expectedDepth} segmentos (ex: "${expectedPrefix}1")`,
-            expectedDepth,
-            expectedPrefix,
-          });
-        }
-
-        const allCashFlows = await repository.getCashFlows();
-        const codeExists = allCashFlows.some(item => item.code === code);
-        if (codeExists) {
-          return t('errorExistingCode', {
-            ns: CASH_FLOW_FORM_NAMESPACE,
-            defaultValue: 'Já existe uma conta com este código',
-          });
-        }
-
-        return true;
-      } catch (error) {
-        console.error('Code validation error:', error);
-        return true;
-      }
+      const error = await validateCodeHook(
+        code,
+        String(parentAccountIdValue),
+        fetchedParentItems,
+        suggestedPrefix ? suggestedPrefix.slice(0, -1) : undefined, // Remove trailing dot from prefix to get suggested code
+      );
+      return error;
     },
-    [db, parentAccountIdValue, parentItems],
+    [
+      fetchedParentItems,
+      parentAccountIdValue,
+      validateCodeHook,
+      suggestedPrefix,
+    ],
   );
 
   const onSubmit = useCallback(
     async (data: CashFlowFormData) => {
-      if (!db) return false;
-
-      setIsLoading(true);
-      try {
-        const repository = new CashFlowRepository(db);
-
-        await repository.insertCashFlow({
-          code: data.code,
-          title: data.title,
+      await submitCashFlow(
+        {
+          code: data.code.trim(),
+          title: data.title.trim(),
           type: Number(data.type),
           parentAccountId: Number(data.parentAccountId),
           acceptsEntries: Number(data.acceptsEntries),
-        });
-
-        showAlert({
-          title: 'Success',
-          message: 'Account created successfully',
-          type: 'success',
-        });
-
-        reset();
-        goBack();
-        return true;
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Failed to create account';
-        showAlert({
-          title: 'Error',
-          message,
-          type: 'error',
-        });
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
+        },
+        refetchItems,
+      );
     },
-    [db, showAlert, reset],
+    [submitCashFlow, refetchItems],
   );
-
-  const loadItems = async () => {
-    if (!db) return;
-    setIsLoading(true);
-    try {
-      const repository = new CashFlowRepository(db);
-      const data = await repository.getCashFlowAbleToBeParent();
-      const flowTypes = await repository.getFlowTypes();
-      setFlowTypes(flowTypes);
-      setParentItems(data);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      console.error('Failed to load items:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const acceptsEntriesOptions: SelectOption[] = useMemo(
     () => [
-      { label: 'Sim', value: '1' },
-      { label: 'Não', value: '0' },
+      { label: 'Sim', value: 1 },
+      { label: 'Não', value: 0 },
     ],
     [],
   );
@@ -284,28 +166,30 @@ export const useCashFlowFormScreen = () => {
     [flowTypes, t],
   );
 
-  const formattedParentItems: SelectOption[] = useMemo(
-    () =>
-      parentItems.map(item => ({
-        label: `${item.code} - ${item.title}`,
-        value: String(item.id),
-      })),
-    [parentItems],
-  );
-
-  const parentCode = useMemo(() => {
-    if (!parentAccountIdValue) return '';
-    const parent = parentItems.find(
-      item => item.id === Number(parentAccountIdValue),
-    );
-    return parent ? parent.code : '';
-  }, [parentAccountIdValue, parentItems]);
+  const formattedParentItems: SelectOption[] = useMemo(() => {
+    const formattedParents = fetchedParentItems.map(item => ({
+      label: `${item.code} - ${item.title}`,
+      value: String(item.id),
+    }));
+    formattedParents.unshift({
+      label: t('noParentAccount', {
+        defaultValue: 'Sem conta pai',
+        ns: CASH_FLOW_FORM_NAMESPACE,
+      }),
+      value: '',
+    });
+    return formattedParents;
+  }, [fetchedParentItems, t]);
 
   useEffect(() => {
-    if (isReady && db) {
-      loadItems();
+    if (itemToView && isReadOnly) {
+      setValue('code', itemToView.code);
+      setValue('title', itemToView.title);
+      setValue('type', String(itemToView.type));
+      setValue('parentAccountId', String(itemToView.parent_id));
+      setValue('acceptsEntries', itemToView.accepts_entries);
     }
-  }, [isReady, db]);
+  }, [itemToView, isReadOnly, setValue]);
 
   return {
     control,
@@ -317,9 +201,11 @@ export const useCashFlowFormScreen = () => {
     flowTypes: formattedFlowTypes,
     acceptsEntriesOptions,
     t,
-    setValue,
     watch,
     validateCode,
-    parentCode,
+    suggestedPrefix,
+    isTypeDisabled,
+    isReadOnly,
+    itemToView,
   };
 };

@@ -1,23 +1,6 @@
 import { CashFlowItem, FlowType } from './types';
 import * as SQLite from 'expo-sqlite';
-
-const sortCodeNumeric = (items: CashFlowItem[]): CashFlowItem[] => {
-  return [...items].sort((a, b) => {
-    const aParts = a.code.split('.').map(Number);
-    const bParts = b.code.split('.').map(Number);
-
-    for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-      const aPart = aParts[i] ?? 0;
-      const bPart = bParts[i] ?? 0;
-
-      if (aPart !== bPart) {
-        return aPart - bPart;
-      }
-    }
-
-    return 0;
-  });
-};
+import { sortCodeNumeric } from './utils/sortCodeNumeric';
 
 export class CashFlowRepository {
   constructor(private db: SQLite.SQLiteDatabase) {}
@@ -39,7 +22,7 @@ export class CashFlowRepository {
     if (!this.db) return [];
     try {
       const result = await this.db.getAllAsync<CashFlowItem>(
-        'SELECT * FROM cash_flow WHERE deleted = 0 AND accepts_entries = 1 ORDER BY code',
+        'SELECT * FROM cash_flow WHERE deleted = 0 ORDER BY code',
       );
       return sortCodeNumeric(result || []);
     } catch (error) {
@@ -130,6 +113,20 @@ export class CashFlowRepository {
     } catch (error) {
       console.error('Failed to load flow types:', error);
       return [];
+    }
+  }
+
+  async getCashFlowByCode(code: string): Promise<CashFlowItem | null> {
+    if (!this.db) return null;
+    try {
+      const result = await this.db.getFirstAsync<CashFlowItem>(
+        'SELECT * FROM cash_flow WHERE code = ? AND deleted = 0',
+        [code],
+      );
+      return result || null;
+    } catch (error) {
+      console.error('Failed to get cash flow by code:', error);
+      return null;
     }
   }
 

@@ -12,4 +12,6 @@ export { Header } from './Header';
 export { Input } from './Input';
 export { Select } from './Select';
 export { SvgIcon } from './SvgIcon';
+export { AlertDialog } from './AlertDialog';
 export type { SelectOption } from './Select';
+export type { AlertDialogProps } from './AlertDialog';

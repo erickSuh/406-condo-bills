@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useCallback } from 'react';
-import { Alert } from 'react-native';
+import React, { createContext, useContext, useCallback, useState } from 'react';
+import { AlertDialog } from '@/shared/components/AlertDialog';
 
 export interface AlertMessage {
   title: string;
@@ -17,21 +17,23 @@ const AlertContext = createContext<AlertContextType | undefined>(undefined);
 export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const showAlert = useCallback((alert: AlertMessage) => {
-    // Only show native alert for errors and warnings
-    if (alert.type === 'error' || alert.type === 'warning') {
-      Alert.alert(alert.title, alert.message, [
-        {
-          text: 'OK',
-          onPress: () => {},
-        },
-      ]);
-    }
+  const [alert, setAlert] = useState<AlertMessage | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-    // For success and info, just log them
-    console.log(
-      `[${alert.type.toUpperCase()}] ${alert.title}: ${alert.message}`,
-    );
+  const showAlert = useCallback((alertMessage: AlertMessage) => {
+    setAlert(alertMessage);
+    setIsVisible(true);
+
+    if (alertMessage.type !== 'error' && alertMessage.type !== 'warning') {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleDismiss = useCallback(() => {
+    setIsVisible(false);
   }, []);
 
   const value: AlertContextType = {
@@ -39,7 +41,18 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AlertContext.Provider value={value}>{children}</AlertContext.Provider>
+    <AlertContext.Provider value={value}>
+      {children}
+      {alert && (
+        <AlertDialog
+          visible={isVisible}
+          title={alert.title}
+          message={alert.message}
+          type={alert.type}
+          onDismiss={handleDismiss}
+        />
+      )}
+    </AlertContext.Provider>
   );
 };
 
