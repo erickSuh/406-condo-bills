@@ -19,7 +19,6 @@ export const useCashFlowValidation = () => {
       parentItems: CashFlowItem[],
       suggestedCode?: string,
     ): Promise<string | true> => {
-      // Check if code is empty
       if (!code.trim()) {
         return t('errorCodeBeEmpty', {
           ns: CASH_FLOW_FORM_NAMESPACE,
@@ -49,7 +48,6 @@ export const useCashFlowValidation = () => {
         return true;
       }
 
-      // Validate depth based on suggested code (not parent)
       if (suggestedCode) {
         const suggestedSegments = suggestedCode.split('.');
         const maxAllowedDepth = suggestedSegments.length + 1;
@@ -94,5 +92,18 @@ export const useCashFlowValidation = () => {
     [db, t],
   );
 
-  return { validateCode };
+  const validateTitle = useCallback(
+    (title: string): string | true => {
+      if (!title || !title.trim()) {
+        return t('errorRequiredField', {
+          ns: CASH_FLOW_FORM_NAMESPACE,
+          defaultValue: 'Este campo é obrigatório',
+        });
+      }
+      return true;
+    },
+    [t],
+  );
+
+  return { validateCode, validateTitle };
 };

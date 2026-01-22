@@ -17,7 +17,6 @@ export const useCashFlowListScreen = () => {
   const { t } = useTranslation(CASH_FLOW_LIST_NAMESPACE);
   const itemsLoadedRef = useRef(false);
 
-  // Use specialized hooks
   const { searchQuery, setSearchQuery, filteredItems } =
     useCashFlowListSearch(items);
 

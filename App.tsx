@@ -26,7 +26,6 @@ function AppContent() {
     );
   }, []);
 
-  // Check for OTA updates on app launch
   useUpdateCheck({
     onUpdateAvailable: () => {
       console.log('📱 Update is being downloaded in the background');

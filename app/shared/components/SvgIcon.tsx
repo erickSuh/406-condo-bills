@@ -18,7 +18,7 @@ interface SvgIconProps {
 
 const iconMap: Record<IconName, React.ComponentType<any>> = {
   trash: TrashIcon,
-  bin: TrashIcon, // alias for trash
+  bin: TrashIcon,
   'chevron-back': ChevronLeftIcon,
   done: DoneIcon,
   add: PlusIcon,

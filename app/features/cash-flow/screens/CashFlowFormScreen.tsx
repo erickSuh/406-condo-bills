@@ -20,6 +20,7 @@ export const CashFlowFormScreen: React.FC = () => {
     flowTypes,
     acceptsEntriesOptions,
     validateCode,
+    validateTitle,
     suggestedPrefix,
     t,
     isTypeDisabled,
@@ -99,7 +100,7 @@ export const CashFlowFormScreen: React.FC = () => {
                     })}
                     value={newValue || suggestedPrefix}
                     onChangeText={handleCodeChange}
-                    maxLength={20}
+                    maxLength={23}
                     editable={!isReadOnly}
                     keyboardType="numeric"
                     accessibilityLabelledBy={'code-label'}
@@ -129,6 +130,7 @@ export const CashFlowFormScreen: React.FC = () => {
                 defaultValue: 'Este campo é obrigatório',
                 ns: CASH_FLOW_FORM_NAMESPACE,
               }),
+              validate: validateTitle,
             }}
             render={({ field: { value, onChange } }) => (
               <>
@@ -218,6 +220,7 @@ export const CashFlowFormScreen: React.FC = () => {
       suggestedPrefix,
       isTypeDisabled,
       validateCode,
+      validateTitle,
     ],
   );
 

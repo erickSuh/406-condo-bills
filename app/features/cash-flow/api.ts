@@ -76,7 +76,6 @@ export class CashFlowRepository {
     visited.add(parentId);
 
     try {
-      // Get direct children of this parent
       const children = await this.db.getAllAsync<{ id: number }>(
         'SELECT id FROM cash_flow WHERE parent_id = ? AND deleted = 0',
         [parentId],
@@ -84,7 +83,6 @@ export class CashFlowRepository {
 
       let allDescendants: number[] = [];
 
-      // For each child, recursively get their children
       for (const child of children || []) {
         if (!visited.has(child.id)) {
           allDescendants.push(child.id);
